@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="zh-cn">
+<head>
+    <meta charset="utf-8">
+    <title></title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="renderer" content="webkit">
+
+    <!-- Loading Bootstrap -->
+    <!--<link href="__PUBLIC__/admin/css/bootstrap.min.css" rel="stylesheet" type="text/css"/>-->
+    <!--<link href="__PUBLIC__/admin/css/backend.min.css?v=1.0.1" rel="stylesheet">-->
+    <link href="__PUBLIC__/assets/css/backend.min.css" rel="stylesheet">
+
+</head>
+
+<body class="inside-header inside-aside is-dialog">
+<div id="main" role="main">
+    <div class="tab-content tab-addtabs">
+        <div id="content">
+            <div class="row">
+                <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                    <section class="content-header hide">
+                        <h1>
+                            控制台                                    <small>Control panel</small>
+                        </h1>
+                    </section>
+                    <div class="content">
+                        <form id="edit-form" class="form-horizontal nice-validator n-default n-bootstrap" role="form" data-toggle="validator" method="POST" action="" novalidate="novalidate">
+                            <div class="form-group">
+                                <label for="c-nickname" class="control-label col-xs-12 col-sm-2">用户id:</label>
+                                <div class="col-xs-12 col-sm-4">
+                                    <input id="c-userid" class="form-control" name="row[nickname]" type="text" value="{$data.UserID}">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="c-nickname" class="control-label col-xs-12 col-sm-2">游戏id:</label>
+                                <div class="col-xs-12 col-sm-4">
+                                    <input id="c-gameid" class="form-control" name="row[nickname]" type="text" value="{$data.GameID}">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="c-nickname" class="control-label col-xs-12 col-sm-2">昵称:</label>
+                                <div class="col-xs-12 col-sm-4">
+                                    <input id="c-nickname" class="form-control" name="row[nickname]" type="text" value="{$data.NickName}">
+                                </div>
+                            </div>
+                            <!--<div class="form-group">-->
+                                <!--<label for="c-score" class="control-label col-xs-12 col-sm-2">修改积分:</label>-->
+                                <!--<div class="col-xs-12 col-sm-4">-->
+                                    <!--<input id="c-score" class="form-control" name="row[score]" type="number" value="{$data.UserID}">-->
+                                <!--</div>-->
+                            <!--</div>-->
+
+                            <div class="form-group">
+                                <label for="c-joinip" class="control-label col-xs-12 col-sm-2">修改房卡:</label>
+                                <div class="col-xs-12 col-sm-4">
+                                    <input id="c-joinip" class="form-control" name="row[joinip]" type="text" value="{$data.RoomCard}">
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="content" class="control-label col-xs-12 col-sm-2">状态:</label>
+                                <div class="col-xs-12 col-sm-8">
+                                    <div class="radio">
+                                        {if condition='$data.StunDown eq 0'}
+                                            <label for="row[status]-normal">
+                                                <input id="row[status]-normal" checked="checked" name="status" type="radio" value="normal"> 正常
+                                            </label>
+                                            <label for="row[status]-hidden">
+                                                <input id="row[status]-hidden" name="status" type="radio" value="hidden"> 冻结
+                                            </label>
+                                        {/ if}
+                                        {if condition='$data.StunDown eq 1'}
+                                            <label for="row[status]-normal">
+                                                <input id="row[status]-normal" name="status" type="radio" value="normal"> 正常
+                                            </label>
+                                            <label for="row[status]-hidden">
+                                                <input id="row[status]-hidden" checked="checked" name="status" type="radio" value="hidden"> 冻结
+                                            </label>
+                                        {/ if}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group layer-footer">
+                                <label class="control-label col-xs-12 col-sm-2"></label>
+                                <div class="col-xs-12 col-sm-8">
+                                    <button type="submit" class="btn btn-success btn-embossed">确定2</button>
+                                    <!--<button type="reset" class="btn btn-default btn-embossed">重置</button>-->
+                                </div>
+                            </div>
+                        </form>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="__PUBLIC__/assets/js/require.min.js" data-main="__PUBLIC__/assets/js/require-backend.min.js?v=1.0.1"></script>
+</body>
+</html>

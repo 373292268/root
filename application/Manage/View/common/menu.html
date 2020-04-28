@@ -1,0 +1,138 @@
+<!--<div class="page-sidebar nav-collapse collapse">-->
+
+<!--&lt;!&ndash; BEGIN SIDEBAR MENU &ndash;&gt;-->
+
+<!--<ul class="page-sidebar-menu">-->
+
+<!--<li>-->
+
+<!--&lt;!&ndash; BEGIN SIDEBAR TOGGLER BUTTON &ndash;&gt;-->
+
+<!--<div class="sidebar-toggler hidden-phone"></div>-->
+
+<!--&lt;!&ndash; BEGIN SIDEBAR TOGGLER BUTTON &ndash;&gt;-->
+
+<!--</li>-->
+
+<!--<li class="start active ">-->
+
+<!--<a href="{:url('Index/index')}">-->
+
+<!--<i class="icon-home"></i>-->
+
+<!--<span class="title">主页面</span>-->
+
+<!--<span class="selected"></span>-->
+
+<!--</a>-->
+
+<!--</li>-->
+<!--&lt;!&ndash;个人中心&ndash;&gt;-->
+<!--<li class="">-->
+
+<!--<a href="javascript:;">-->
+
+<!--<i class="icon-user"></i>-->
+
+<!--<span class="title">个人中心-->
+<!--&lt;!&ndash;<img style="width:10px;position:absolute;top:2vh;left:25.3vw;" src="__PUBLIC__/home/images/circle.png" />&ndash;&gt;-->
+<!--</span>-->
+<!--<span class="arrow "></span>-->
+<!--</a>-->
+<!--<ul class="sub-menu">-->
+<!--<li>-->
+<!--<a href="{:url('Index/addrecord')}">添加记录</a>-->
+<!--</li>-->
+<!--<li>-->
+<!--<a href="{:url('Index/authrule')}">记录统计</a>-->
+<!--</li>-->
+<!--</ul>-->
+<!--</li>-->
+
+
+<!--</ul>-->
+<!--&lt;!&ndash; END SIDEBAR MENU &ndash;&gt;-->
+
+<!--</div>-->
+
+<aside class="main-sidebar">
+    <!-- 左侧菜单栏 -->
+    <div class="slimScrollDiv" style="position: relative; overflow: hidden; width: auto; height: 886px;">
+        <section class="sidebar" style="height: 886px; overflow: hidden; width: auto;">
+            <!-- 管理员信息 -->
+            <div class="user-panel hidden-xs">
+                <div class="pull-left image">
+                    <a href="general/profile" class="addtabsit">
+                        <img src="__PUBLIC__/admin/images/avatar.jpg" class="img-circle" />
+                    </a>
+                </div>
+                <div class="pull-left info">
+                    <p>Admin</p>
+                    <i class="fa fa-circle text-success"></i> 在线
+                </div>
+            </div>
+
+            <!-- 菜单搜索 -->
+            <!--<form action="" method="get" class="sidebar-form" onsubmit="return false;">-->
+            <!--<div class="input-group">-->
+            <!--<input type="text" name="q" class="form-control" placeholder="搜索菜单">-->
+            <!--<span class="input-group-btn">-->
+            <!--<button type="submit" name="search" id="search-btn" class="btn btn-flat"><i class="fa fa-search"></i>-->
+            <!--</button>-->
+            <!--</span>-->
+            <!--<div class="menuresult list-group sidebar-form hide" style="width: 210px;">-->
+            <!--</div>-->
+            <!--</div>-->
+            <!--</form>-->
+
+            <!-- 移动端一级菜单 -->
+            <div class="mobilenav visible-xs">
+
+            </div>
+
+            <!--如果想始终显示子菜单,则给ul加上show-submenu类即可,当multiplenav开启的情况下默认为展开-->
+            <ul class="sidebar-menu ">
+
+                <!-- 控制台 -->
+                <li class="active">
+                    <a href="{:url('body')}" addtabs="1" url="/index/body" target="right" py="kzt" pinyin="kongzhitai">
+                        <i class="fa fa-dashboard fa-fw"></i>
+                        <span>控制台</span>
+                        <span class="pull-right-container">
+                            <!--<small class="label pull-right bg-blue">hot</small>-->
+                        </span>
+                    </a>
+                </li>
+
+                <!-- 用户管理 -->
+                {volist name='menu' id='vo'}
+                <li class="treeview">
+                    <a href="javascript:;" addtabs="2" url="javascript:;" >
+                        <i class="{$vo['icon']}"></i>
+                        <span>{$vo['name']}</span>
+                        <span class="pull-right-container">
+                            <i class="fa fa-angle-left"></i>
+                        </span>
+                    </a>
+                    <ul class="treeview-menu">
+                        {volist name="$vo['action']" id='v'}
+                        <li class="">
+                            <a href="/{$v['module']}/{$v['controller']}/{$v['value']}" target="right" addtabs="6" >
+                                <i class="{$v['icon']}"></i>
+                                <span>{$v['name']}</span> <span class="pull-right-container"> </span>
+                            </a>
+                        </li>
+                        {/volist}
+                    </ul>
+                </li>
+                {/volist}
+
+            </ul>
+        </section>
+        <div class="slimScrollBar"
+             style="background: rgba(0, 0, 0, 0.2); width: 8px; position: absolute; top: 0px; opacity: 0.4; display: none; border-radius: 7px; z-index: 99; right: 1px; height: 886px;"></div>
+        <div class="slimScrollRail"
+             style="width: 8px; height: 100%; position: absolute; top: 0px; display: none; border-radius: 7px; background: rgb(51, 51, 51); opacity: 0.2; z-index: 90; right: 1px;"></div>
+    </div>
+</aside>
+

@@ -1,0 +1,205 @@
+<!--<div class="header navbar navbar-inverse navbar-fixed-top">-->
+
+    <!--&lt;!&ndash; BEGIN TOP NAVIGATION BAR &ndash;&gt;-->
+
+    <!--<div class="navbar-inner">-->
+
+        <!--<div class="container-fluid">-->
+
+            <!--&lt;!&ndash; BEGIN LOGO &ndash;&gt;-->
+
+            <!--<a class="brand" href="index.html">-->
+
+                <!--<span>游戏管理平台</span>-->
+
+            <!--</a>-->
+
+
+            <!--<a href="javascript:;" style="position:relative" class="btn-navbar collapsed" data-toggle="collapse" data-target=".nav-collapse">-->
+                <!--<span>菜单</span>-->
+                <!--<img src="__PUBLIC__/admin/images/menu-toggler.png" alt=""/>-->
+                <!--&lt;!&ndash;<img style="width:10px;position:absolute;top:1vh;left:14vw;" src="__PUBLIC__/home/images/circle.png" />&ndash;&gt;-->
+            <!--</a>-->
+            <!--<ul class="nav pull-right">-->
+                <!--<li class="dropdown user">-->
+
+                    <!--<a href="#" class="dropdown-toggle" data-toggle="dropdown">-->
+
+                        <!--<img alt="" src="__PUBLIC__/admin/images/avatar1_small.jpg"/>-->
+
+
+                        <!--<i class="icon-angle-down"></i>-->
+
+                    <!--</a>-->
+
+                    <!--<ul class="dropdown-menu">-->
+
+                        <!--&lt;!&ndash;<li><a href="extra_profile.html"><i class="icon-user"></i> My Profile</a></li>&ndash;&gt;-->
+
+                        <!--&lt;!&ndash;<li><a href="page_calendar.html"><i class="icon-calendar"></i> My Calendar</a></li>&ndash;&gt;-->
+
+                        <!--&lt;!&ndash;<li><a href="inbox.html"><i class="icon-envelope"></i> My Inbox(3)</a></li>&ndash;&gt;-->
+
+                        <!--&lt;!&ndash;<li><a href="#"><i class="icon-tasks"></i> My Tasks</a></li>&ndash;&gt;-->
+
+                        <!--&lt;!&ndash;<li class="divider"></li>&ndash;&gt;-->
+
+                        <!--<li><a href="{:url('Index/password')}"><i class="icon-lock"></i>修改密码</a></li>-->
+
+                        <!--<li><a href="{:url('Login/close_login')}"><i class="icon-key"></i>注销</a></li>-->
+
+                    <!--</ul>-->
+
+                <!--</li>-->
+
+                <!--&lt;!&ndash; END USER LOGIN DROPDOWN &ndash;&gt;-->
+
+            <!--</ul>-->
+
+            <!--&lt;!&ndash; END TOP NAVIGATION MENU &ndash;&gt;-->
+
+        <!--</div>-->
+
+    <!--</div>-->
+
+    <!--&lt;!&ndash; END TOP NAVIGATION BAR &ndash;&gt;-->
+
+<!--</div>-->
+<!--<header id="header" class="main-header">-->
+    <!-- Logo -->
+    <a href="javascript:;" class="logo">
+        <!-- 迷你模式下Logo的大小为50X50 -->
+        <span class="logo-mini">FAST</span>
+        <!-- 普通模式下Logo -->
+        <span class="logo-lg"><b>Fast</b>Admin</span>
+    </a>
+
+    <!-- 顶部通栏样式 -->
+    <nav class="navbar navbar-static-top">
+
+        <!--第一级菜单-->
+        <div id="firstnav">
+            <!-- 边栏切换按钮-->
+            <a href="#" class="sidebar-toggle" data-toggle="offcanvas" role="button">
+                <span class="sr-only">Toggle navigation</span>
+            </a>
+
+            <!--如果不想在顶部显示角标,则给ul加上disable-top-badge类即可-->
+            <!--<ul class="nav nav-tabs nav-addtabs disable-top-badge hidden-xs "  role="tablist" style="width: 648px;"><li class="dropdown pull-right tabdrop"><a class="dropdown-toggle" data-toggle="dropdown" href="javascript:;"><i class="glyphicon glyphicon-align-justify"></i> <b class="caret"></b></a><ul class="dropdown-menu"><li role="presentation" id="tab_4" class=""><a href="#con_4" node-id="4" aria-controls="4" role="tab" data-toggle="tab"><i class="fa fa-rocket fa-fw"></i> <span>插件管理</span> <span class="pull-right-container"> <small class="badge pull-right bg-red">new</small></span></a> <i class="close-tab fa fa-remove"></i></li><li role="presentation" id="tab_9" class=""><a href="#con_9" node-id="9" aria-controls="9" role="tab" data-toggle="tab"><i class="fa fa-user fa-fw"></i> <span>管理员管理</span> <span class="pull-right-container"> </span></a> <i class="close-tab fa fa-remove"></i></li><li role="presentation" id="tab_10" class=""><a href="#con_10" node-id="10" aria-controls="10" role="tab" data-toggle="tab"><i class="fa fa-list-alt fa-fw"></i> <span>管理员日志</span> <span class="pull-right-container"> </span></a> <i class="close-tab fa fa-remove"></i></li><li role="presentation" id="tab_11" class=""><a href="#con_11" node-id="11" aria-controls="11" role="tab" data-toggle="tab"><i class="fa fa-group fa-fw"></i> <span>角色组</span> <span class="pull-right-container"> </span></a> <i class="close-tab fa fa-remove"></i></li><li role="presentation" id="tab_12" class=""><a href="#con_12" node-id="12" aria-controls="12" role="tab" data-toggle="tab"><i class="fa fa-bars fa-fw"></i> <span>菜单规则</span> <span class="pull-right-container"> <small class="label pull-right bg-purple">菜单</small></span></a> <i class="close-tab fa fa-remove"></i></li></ul></li>-->
+                <!--<li role="presentation" id="tab_1" class="active"><a href="#con_1" node-id="1" aria-controls="1" role="tab" data-toggle="tab"><i class="fa fa-dashboard fa-fw fa-fw"></i> <span>控制台</span> </a></li>        <li role="presentation" id="tab_6" class=""><a href="#con_6" node-id="6" aria-controls="6" role="tab" data-toggle="tab"><i class="fa fa-cog fa-fw"></i> <span>系统配置</span> <span class="pull-right-container"> </span></a> <i class="close-tab fa fa-remove"></i></li><li role="presentation" id="tab_7" class=""><a href="#con_7" node-id="7" aria-controls="7" role="tab" data-toggle="tab"><i class="fa fa-file-image-o fa-fw"></i> <span>附件管理</span> <span class="pull-right-container"> </span></a> <i class="close-tab fa fa-remove"></i></li><li role="presentation" id="tab_8" class=""><a href="#con_8" node-id="8" aria-controls="8" role="tab" data-toggle="tab"><i class="fa fa-user fa-fw"></i> <span>个人配置</span> <span class="pull-right-container"> </span></a> <i class="close-tab fa fa-remove"></i></li><li role="presentation" id="tab_3" class=""><a href="#con_3" node-id="3" aria-controls="3" role="tab" data-toggle="tab"><i class="fa fa-list fa-fw"></i> <span>分类管理</span> <span class="pull-right-container"> </span></a> <i class="close-tab fa fa-remove"></i></li></ul>-->
+
+            <div class="navbar-custom-menu">
+                <ul class="nav navbar-nav">
+
+                    <!--<li>-->
+                        <!--<a href="/" target="_blank"><i class="fa fa-home" style="font-size:14px;"></i></a>-->
+                    <!--</li>-->
+
+                    <!--<li class="dropdown notifications-menu hidden-xs">-->
+                        <!--<a href="#" class="dropdown-toggle" data-toggle="dropdown">-->
+                            <!--<i class="fa fa-bell-o"></i>-->
+                            <!--<span class="label label-warning"></span>-->
+                        <!--</a>-->
+                        <!--<ul class="dropdown-menu">-->
+                            <!--<li class="header">最新消息</li>-->
+                            <!--<li>-->
+                                <!--&lt;!&ndash; FastAdmin最新更新信息,你可以替换成你自己站点的信息,请注意修改public/assets/js/backend/index.js文件 &ndash;&gt;-->
+                                <!--<div class="slimScrollDiv" style="position: relative; overflow: hidden; width: auto; height: 200px;"><ul class="menu" style="overflow: hidden; width: 100%; height: 200px;">-->
+
+                                <!--</ul><div class="slimScrollBar" style="background: rgb(0, 0, 0); width: 3px; position: absolute; top: 0px; opacity: 0.4; display: block; border-radius: 7px; z-index: 99; right: 1px;"></div><div class="slimScrollRail" style="width: 3px; height: 100%; position: absolute; top: 0px; display: none; border-radius: 7px; background: rgb(51, 51, 51); opacity: 0.2; z-index: 90; right: 1px;"></div></div>-->
+                            <!--</li>-->
+                            <!--<li class="footer"><a href="#" target="_blank">查看更多</a></li>-->
+                        <!--</ul>-->
+                    <!--</li>-->
+
+                    <!-- 账号信息下拉框 -->
+                    <!--<li class="hidden-xs">-->
+                        <!--<a href="javascript:;" data-toggle="checkupdate" title="检测更新">-->
+                            <!--<i class="fa fa-refresh"></i>-->
+                        <!--</a>-->
+                    <!--</li>-->
+
+                    <!-- 清除缓存 -->
+                    <!--<li>-->
+                        <!--<a href="javascript:;" data-toggle="dropdown" title="清空缓存">-->
+                            <!--<i class="fa fa-trash"></i>-->
+                        <!--</a>-->
+                        <!--<ul class="dropdown-menu wipecache">-->
+                            <!--<li><a href="javascript:;" data-type="all"><i class="fa fa-trash"></i> 一键清除缓存</a></li>-->
+                            <!--<li class="divider"></li>-->
+                            <!--<li><a href="javascript:;" data-type="content"><i class="fa fa-file-text"></i> 清空内容缓存</a></li>-->
+                            <!--<li><a href="javascript:;" data-type="template"><i class="fa fa-file-image-o"></i> 清除模板缓存</a></li>-->
+                            <!--<li><a href="javascript:;" data-type="addons"><i class="fa fa-rocket"></i> 清除插件缓存</a></li>-->
+                        <!--</ul>-->
+                    <!--</li>-->
+
+                    <!-- 多语言列表 -->
+                    <!--<li class="hidden-xs">-->
+                        <!--<a href="javascript:;" class="dropdown-toggle" data-toggle="dropdown"><i class="fa fa-language"></i></a>-->
+                        <!--<ul class="dropdown-menu">-->
+                            <!--<li class="active">-->
+                                <!--<a href="?ref=addtabs&amp;lang=zh-cn">简体中文</a>-->
+                            <!--</li>-->
+                            <!--<li class="">-->
+                                <!--<a href="?ref=addtabs&amp;lang=en">English</a>-->
+                            <!--</li>-->
+                        <!--</ul>-->
+                    <!--</li>-->
+
+                    <!-- 全屏按钮 -->
+                    <!--<li class="hidden-xs">-->
+                        <!--<a href="#" data-toggle="fullscreen"><i class="fa fa-arrows-alt"></i></a>-->
+                    <!--</li>-->
+
+                    <!-- 账号信息下拉框 -->
+                    <li class="dropdown user user-menu">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                            <img src="__PUBLIC__/admin/images/avatar1_small.jpg" class="user-image" alt="Admin">
+                            <span class="hidden-xs">Admin</span>
+                        </a>
+                        <ul class="dropdown-menu">
+                            <!-- User image -->
+                            <li class="user-header">
+                                <img src="__PUBLIC__/admin/images/avatar.jpg" class="img-circle" alt="">
+                                <p>
+                                    Admin
+                                    <small>2019-12-12 11:56:32</small>
+                                </p>
+                            </li>
+                            <!-- Menu Body -->
+                            <!--<li class="user-body">-->
+                                <!--<div class="row">-->
+                                    <!--<div class="col-xs-4 text-center">-->
+                                        <!--<a href="https://www.fastadmin.net" target="_blank">FastAdmin</a>-->
+                                    <!--</div>-->
+                                    <!--<div class="col-xs-4 text-center">-->
+                                        <!--<a href="https://forum.fastadmin.net" target="_blank">交流社区</a>-->
+                                    <!--</div>-->
+                                    <!--<div class="col-xs-4 text-center">-->
+                                        <!--<a href="https://doc.fastadmin.net" target="_blank">官方文档</a>-->
+                                    <!--</div>-->
+                                <!--</div>-->
+                            <!--</li>-->
+                            <!-- Menu Footer-->
+                            <li class="user-footer">
+                                <div class="pull-left">
+                                    <a href="general/profile" class="btn btn-primary addtabsit"><i class="fa fa-user"></i>
+                                        个人配置</a>
+                                </div>
+                                <div class="pull-right">
+                                    <a href="/admin/index/logout" class="btn btn-danger"><i class="fa fa-sign-out"></i>
+                                        注销</a>
+                                </div>
+                            </li>
+                        </ul>
+                    </li>
+                    <!-- 控制栏切换按钮 -->
+                    <!--<li class="hidden-xs">-->
+                        <!--<a href="javascript:;" data-toggle="control-sidebar"><i class="fa fa-gears"></i></a>-->
+                    <!--</li>-->
+                </ul>
+            </div>
+        </div>
+
+    </nav>
+<!--</header>-->

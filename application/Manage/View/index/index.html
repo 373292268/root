@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+
+<!--[if IE 8]>
+<html lang="en" class="ie8 no-js"> <![endif]-->
+
+<!--[if IE 9]>
+<html lang="en" class="ie9 no-js"> <![endif]-->
+
+<!--[if !IE]><!-->
+<html lang="en" class="no-js"> <!--<![endif]-->
+
+<!-- BEGIN HEAD -->
+
+<head>
+
+    {include file="common/meta" /}
+    <!-- END PAGE LEVEL STYLES -->
+</head>
+
+<!-- END HEAD -->
+
+<!-- BEGIN BODY -->
+
+<body class="skin-green sidebar-mini fixed" id="tabs">
+<div class="wrapper">
+<!-- BEGIN HEADER -->
+<header id="header" class="main-header">
+    {include file='common/header' /}
+    <script type="text/javascript">
+        var require = {
+            config:  {"site":{"name":"FastAdmin","cdnurl":"","version":"1.0.1","timezone":"Asia\/Shanghai","languages":{"backend":"zh-cn","frontend":"zh-cn"}},"upload":{"cdnurl":"","uploadurl":"ajax\/upload","bucket":"local","maxsize":"10mb","mimetype":"jpg,png,jpeg,gif","multipart":[],"multiple":false},"modulename":"admin","controllername":"index","actionname":"index","jsname":"backend\/index","moduleurl":"\/admin","language":"zh-cn","fastadmin":{"usercenter":true,"login_captcha":false,"login_failure_retry":true,"login_unique":false,"login_background":"\/assets\/img\/loginbg.jpg","multiplenav":false,"checkupdate":false,"version":"1.0.0.20181210_beta","api_url":"https:\/\/api.fastadmin.net"},"referer":"\/admin\/dashboard","__PUBLIC__":"\/","__ROOT__":"\/","__CDN__":"https:\/\/cdn.pure.fastadmin.net"}    };
+    </script>
+</header>
+
+<!-- END HEADER -->
+
+<!-- BEGIN CONTAINER -->
+
+<!--<div class="page-container">-->
+
+    <!-- 菜单 -->
+<aside class="main-sidebar">
+    {include file='common/menu' /}
+</aside>
+
+
+    <!-- 菜单结束 -->
+
+    <!-- BEGIN PAGE -->
+    <!-- 主体内容区域 -->
+    <div class="content-wrapper tab-content tab-addtabs">
+        <div role="tabpanel" class="tab-pane active" id="con_1">
+            <iframe src="body.html" id="right" name="right" width="100%" height="100%" frameborder="no" border="0" marginwidth="0" marginheight="0" scrolling-x="no" scrolling-y="auto" allowtransparency="yes"></iframe>
+        </div>
+    </div>
+<!--<iframe src="body.html" width="80%" height="100%" frameborder="no" border="0" marginwidth="0" marginheight="0" scrolling-x="no" scrolling-y="auto" allowtransparency="yes"></iframe>-->
+    <!-- END PAGE -->
+
+<!--</div>-->
+{include file="common/script"/}
+
+
+
+<!-- END JAVASCRIPTS -->
+</div>
+</body>
+
+<!-- END BODY -->
+
+</html>

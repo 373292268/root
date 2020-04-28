@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+
+<!--[if IE 8]>
+<html lang="en" class="ie8"> <![endif]-->
+
+<!--[if IE 9]>
+<html lang="en" class="ie9"> <![endif]-->
+
+<!--[if !IE]><!-->
+<html lang="en"> <!--<![endif]-->
+
+<!-- BEGIN HEAD -->
+
+<head>
+
+    <meta charset="utf-8"/>
+
+    <title>记录</title>
+
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+
+    <meta content="" name="description"/>
+
+    <meta content="" name="author"/>
+
+    <!-- BEGIN GLOBAL MANDATORY STYLES -->
+
+    <link href="__PUBLIC__/home/css/bootstrap.min.css" rel="stylesheet" type="text/css"/>
+
+    <link href="__PUBLIC__/home/css/bootstrap-responsive.min.css" rel="stylesheet" type="text/css"/>
+
+    <link href="__PUBLIC__/home/css/font-awesome.min.css" rel="stylesheet" type="text/css"/>
+
+    <link href="__PUBLIC__/home/css/style-metro.css" rel="stylesheet" type="text/css"/>
+
+    <link href="__PUBLIC__/home/css/style.css" rel="stylesheet" type="text/css"/>
+
+    <link href="__PUBLIC__/home/css/style-responsive.css" rel="stylesheet" type="text/css"/>
+
+    <link href="__PUBLIC__/home/css/default.css" rel="stylesheet" type="text/css" id="style_color"/>
+    <link href="__PUBLIC__/home/css/idxstyle.css" rel="stylesheet" type="text/css"/>
+    <link rel="stylesheet" href="__PUBLIC__/home/css/simpleAlert.css"/>
+
+    <link href="__PUBLIC__/home/css/uniform.default.css" rel="stylesheet" type="text/css"/>
+
+    <!-- END GLOBAL MANDATORY STYLES -->
+
+    <link rel="shortcut icon" href="__PUBLIC__/home/images/favicon.ico"/>
+    <style>
+        .cover{
+            width:100vw;
+            height:99vh;
+            background: rgba(0,0,0,0.8);
+            position: fixed;
+            top:0;
+            left:0;
+            z-index: 999;
+        }
+        /*.order_info{*/
+        /*position:relative;*/
+        /*}*/
+        @media(min-width:1000px) {
+            .order_info {
+                width: 26vw;
+                position: relative;
+                top: 2%;
+                left: 50%;
+                margin-left: -13vw;
+                padding: 0;
+                font-size: 1.2em;
+                /*margin-left:-30%;*/
+            }
+            .info img{
+                width:15vw;
+            }
+            .close_img{
+                width:2vw;
+                position:absolute;
+                top:2%;
+                right:-15%;
+            }
+        }
+        @media(max-width:800px) {
+            .order_info {
+                width: 50vw;
+                position: fixed;
+                top: 2%;
+                left: 50%;
+                margin-left: -34vw;
+                /*padding: 5%;*/
+                font-size: 1em;
+                /*margin-left:-30%;*/
+            }
+            .info img{
+                width:30vw;
+            }
+            .close_img{
+                width:5vw;
+                position:absolute;
+                top:2%;
+                right:-15%;
+            }
+        }
+        @media(max-width:1000px) and (min-width:800px) {
+            .order_info {
+                width: 40vw;
+                position: fixed;
+                top: 2%;
+                left: 50%;
+                margin-left: -23vw;
+                /*padding: 5%;*/
+                font-size: 1em;
+                /*margin-left:-30%;*/
+            }
+            .info img{
+                width:30vw;
+            }
+            .close_img{
+                width:4vw;
+                position:absolute;
+                top:2%;
+                right:-15%;
+            }
+        }
+
+        .info{
+            padding: 10%;
+            overflow-y:scroll;
+            max-height: 85vh;
+        }
+        .info ul{
+            padding:0;
+            margin:0;
+        }
+        .info li{
+            overflow: hidden;
+            border-bottom: 1px solid #aaa;
+            margin-top: 2vh;
+        }
+        .info li div:first-child{
+            float:left;
+        }
+        .info li div:last-child{
+            float:right;
+        }
+        .close_img{
+            z-index: 999999999;
+        }
+    </style>
+</head>
+
+<!-- END HEAD -->
+
+<!-- BEGIN BODY -->
+
+<body class="page-header-fixed">
+
+<!-- BEGIN HEADER -->
+
+{include file="public/top"/}
+
+<!-- END HEADER -->
+
+<!-- BEGIN CONTAINER -->
+
+<div class="page-container row-fluid">
+
+    <!-- 菜单 -->
+
+    {include file="public/nav"/}
+
+    <!-- 菜单结束 -->
+
+    <!-- BEGIN 主要内容 -->
+
+    <div class="page-content" style="min-height:911px;">
+
+        <!-- BEGIN PAGE CONTAINER-->
+
+        <div class="container-fluid">
+
+            <!-- BEGIN 页面导航-->
+
+            <div class="row-fluid">
+
+                <div class="span12" style="margin-left:0!important;">
+                    <!-- BEGIN 页面导航-->
+                    <h3 class="page-title">
+                        后台管理
+                        <small>订单处理</small>
+
+                    </h3>
+
+                    <ul class="breadcrumb">
+
+                        <li>
+
+                            <i class="icon-home"></i>
+
+                            <a href="{:url('Index/index')}">Home</a>
+
+                            <i class="icon-angle-right"></i>
+
+                        </li>
+
+                        <li>
+
+                            <a href="#">后台管理</a>
+
+                            <i class="icon-angle-right"></i>
+
+                        </li>
+
+                        <li><a href="#">订单处理</a></li>
+
+                    </ul>
+
+                </div>
+
+            </div>
+
+            <!-- END PAGE 导航-->
+
+            <!-- BEGIN PAGE CONTENT-->
+
+            <div class="row-fluid">
+
+                <div class="span12" style="margin-left:0!important;">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div id="role_table_wrapper" class="dataTables_wrapper no-footer">
+                                <!--<div class="row">-->
+                                    <!--<div class="col-md-6 col-sm-12" style="overflow: hidden">-->
+                                <form action="{:url('index/statistical')}">
+                                        <div class="dataTables_length" style="float:left" id="role_table_length">
+                                            <label>姓名</label>
+                                            <select name="name" style="width:8vw;" id="name" class="">
+                                                <option value="all">全部</option>
+                                                {volist name="user" id='v'}
+                                                <option value="{$v.user}">{$v.user}</option>
+                                                {/volist}
+                                            </select>
+                                        </div>
+                                        <input type="hidden" name="type" value="server"/>
+                                        <div class="dataTables_length" style="float:left;margin-left:2vw;">
+                                            <label>按日期</label>
+                                            <input type="date" name="start" id="start" />——<input type="date" name="end" id="end" />
+                                        </div>
+                                        <!--<div class="dataTables_length" style="float:left;margin-left:2vw;">-->
+                                            <!--<label>下班时间</label>-->
+                                            <!--<input type="time" id="time" name="down_time" />-->
+                                        <!--</div>-->
+                                        <button type="submit" class="btn green" style="float:left;margin-left:2vw;">点击查询</button>
+                                    <!--</div>-->
+                                <!--</div>-->
+                                </form>
+                                {if ($status == 1 )}
+                                <div class="table-scrollable" style="margin-bottom:60px!important">
+                                    <table class="table table-hover dataTable no-footer" role="grid"
+                                           aria-describedby="sell_table_info" style="width: 578px;">
+                                        <thead>
+                                        <tr role="row">
+                                            <th class="sorting_disabled" rowspan="1" colspan="2" aria-label="帐号"
+                                                style="width: 52px;font-size: 26px;text-align: center;">统计
+                                            </th>
+                                        </tr>
+                                        <tr role="row">
+                                            <th class="sorting_disabled" rowspan="1" colspan="1" aria-label="帐号"
+                                                style="width: 52px;">姓名
+                                            </th>
+                                            <th class="sorting_disabled" rowspan="1" colspan="1" aria-label="帐号"
+                                                style="width: 52px;">次数
+                                            </th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        {volist id="voo" name="statistical"}
+                                        <tr role="row" class="odd">
+                                            <!--用户游戏id-->
+                                            <td>{$voo.user}</td>
+                                            <!--用户姓名-->
+                                            <td>{$voo.count}</td>
+                                        </tr>
+                                        {/volist}
+                                        </tbody>
+                                    </table>
+                                </div>
+                                {/if}
+                                <div class="table-scrollable">
+                                    <table class="table table-hover dataTable no-footer" id="sell_table" role="grid"
+                                           aria-describedby="sell_table_info" style="width: 578px;">
+                                        <thead>
+                                        <tr role="row">
+
+                                            <th class="sorting_disabled" rowspan="1" colspan="1" aria-label="帐号"
+                                                style="width: 52px;">id
+                                            </th>
+                                            <th class="sorting_disabled" rowspan="1" colspan="1" aria-label="帐号"
+                                                style="width: 52px;">姓名
+                                            </th>
+                                            <th class="sorting_disabled" rowspan="1" colspan="1" aria-label="角色昵称"
+                                                style="width: 42px;">记录时间
+                                            </th>
+                                            <th class="sorting_disabled" rowspan="1" colspan="1" aria-label="角色昵称"
+                                                style="width: 42px;">下班时间
+                                            </th>
+
+
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        {volist id="vo" name="list"}
+                                            <tr role="row" class="odd">
+
+                                                <!--用户游戏id-->
+
+                                                <td>{$vo.id}</td>
+                                                <!--用户姓名-->
+
+                                                <td>{$vo.name}</td>
+                                                <!--用户订单号-->
+
+                                                <td>{$vo.time}</td>
+                                                <!--订单号-->
+                                                <td>{$vo.down_time}</td>
+                                            </tr>
+                                        {/volist}
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-7 col-sm-12">
+                                        <div class="dataTables_paginate paging_bootstrap" id="role_table_paginate">
+                                            <!--页码-->
+                                            <!--<div class="pages">{//$page}</div>-->
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- END PAGE CONTENT-->
+
+        </div>
+
+    <!-- END 主要内容 -->
+
+</div>
+</div>
+<!-- END CONTAINER -->
+{include file="public/js_into"/}
+<!-- BEGIN JAVASCRIPTS(Load javascripts at bottom, this will reduce page load time) -->
+
+<!--&lt;!&ndash; BEGIN CORE PLUGINS &ndash;&gt;-->
+
+<!--<script src="media/js/jquery-1.10.1.min.js" type="text/javascript"></script>-->
+
+<!--<script src="media/js/jquery-migrate-1.2.1.min.js" type="text/javascript"></script>-->
+
+<!--&lt;!&ndash; IMPORTANT! Load jquery-ui-1.10.1.custom.min.js before bootstrap.min.js to fix bootstrap tooltip conflict with jquery ui tooltip &ndash;&gt;-->
+
+<!--<script src="media/js/jquery-ui-1.10.1.custom.min.js" type="text/javascript"></script>-->
+
+<!--<script src="media/js/bootstrap.min.js" type="text/javascript"></script>-->
+
+<!--&lt;!&ndash;[if lt IE 9]>-->
+
+<!--<script src="media/js/excanvas.min.js"></script>-->
+
+<!--<script src="media/js/respond.min.js"></script>-->
+
+<!--<![endif]&ndash;&gt;-->
+
+<!--<script src="media/js/jquery.slimscroll.min.js" type="text/javascript"></script>-->
+
+<!--<script src="media/js/jquery.blockui.min.js" type="text/javascript"></script>-->
+
+<!--<script src="media/js/jquery.cookie.min.js" type="text/javascript"></script>-->
+
+<!--<script src="media/js/jquery.uniform.min.js" type="text/javascript"></script>-->
+
+<!--&lt;!&ndash; END CORE PLUGINS &ndash;&gt;-->
+
+<!--<script src="media/js/app.js"></script>-->
+<script src="__PUBLIC__/home/js/simpleAlert.js"></script>
+<script src="http://code.jquery.com/jquery-1.7.2.min.js"></script>
+<script>
+
+    jQuery(document).ready(function () {
+
+        App.init();
+
+    });
+
+    // 获取用户支付数据
+    // function select_user(){
+    //     $name=$('#name').val();
+    //     $start=$('#start').val();
+    //     $end=$('#end').val();
+    //
+    //     $.ajax({
+    //         url:"{:url('index/authrule')}",
+    //         type:'get',
+    //         dataType:'json',
+    //         data:'name='+$name+'&start='+$start+'&end='+$end,
+    //         success:function(data){
+    //             console.log(data[1]);
+    //             // return false;
+    //             location.reload();
+    //             alert(data[1]);
+    //         }
+    //     });
+    // }
+</script>
+
+<!-- END JAVASCRIPTS -->
+
+</body>
+
+<!-- END BODY -->
+
+</html>

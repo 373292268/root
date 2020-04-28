@@ -57,5 +57,16 @@ class acc_acinfo extends Model
         $userInfo=self::conn_accounts()->table('accountsinfo ai')->field('ai.UserID,ai.GameID,ai.NickName,ai.StunDown,urc.RoomCard')->leftJoin('RYTreasureDBLink.rytreasuredb.dbo.userroomcard urc' , 'urc.UserID = ai.UserID')->where(['ai.UserID'=>$user_id])->findOrEmpty();
         return $userInfo;
     }
+    /*
+* 获取白名单list
+*
+* @return $MessageList 获取白名单
+* */
+    public static function getWhiteList(){
+        $whiteList=self::conn_accounts()
+            ->table('accountswhitelist')
+            ->paginate(15);
 
+        return $whiteList;
+    }
 }

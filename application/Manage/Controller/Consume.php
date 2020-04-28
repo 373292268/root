@@ -34,6 +34,24 @@ class Consume extends Common
         $this->assign('page',$page);
         return $this->fetch('ScrollNotice');
     }
+
+    /**
+     * 白名单
+     * 平台
+     *
+     * $NewsID      公告id
+     * @return $status int  状态码
+     * @return $msg string  错误信息
+     * @return $data array  返回数据
+     */
+    public function WhiteList(){
+        $user_list=acc_acinfo::getWhiteList();
+        $page = $user_list->render();
+        $data=$user_list->toArray();
+        $this->assign('list',$data['data']);
+        $this->assign('page',$page);
+        return $this->fetch('WhiteList');
+    }
     /**
      * 公告详情
      * 公告
@@ -91,6 +109,9 @@ class Consume extends Common
     }
     public function RechargeDiamond(){
         return $this->fetch('RechargeDiamond');
+    }
+    public function indexWhite(){
+        return $this->fetch('indexWhite');
     }
     /**
      * 新增公告
@@ -333,6 +354,33 @@ class Consume extends Common
             return json(['code'=>400,'msg'=>'删除失败']);
         }
     }
+
+    /**
+     * 删除白名单
+     * 平台
+     *
+     * $NewsID      公告id
+     * @return $status int  状态码
+     * @return $msg string  错误信息
+     * @return $data array  返回数据
+     */
+    public function deleteWhiteList(){
+        $ID=input('post.ID/d');
+        if(empty($ID)){
+            return json(['code'=>404,'msg'=>'参数为空']);
+        }
+        Db::startTrans();
+        $deleteResult=acc_acinfo::conn_accounts()->table('accountswhitelist')->where([['ID','=',$ID]])->delete();
+
+        if($deleteResult==1){
+            Db::commit();//执行
+            return json(['code'=>200,'msg'=>'删除成功']);
+        }else{
+            Db::rollback();//回滚
+            return json(['code'=>400,'msg'=>'删除失败']);
+        }
+
+    }
     /**
      * 获取用户钻石数量
      * ajax
@@ -573,4 +621,57 @@ class Consume extends Common
             return json(['code'=>400,'msg'=>'修改失败']);
         }
     }
+
+    /**
+     * 添加白名单列表
+     * ajax
+     *
+     * $name        字段名字
+     * $value       字段值
+     *
+     * @return $status int  状态码
+     * @return $msg string  错误信息
+     * @return $data array  返回数据
+     */
+    public function addWhiteList(){
+        $UserID=input('post.UserID/d');
+        $GameID=input('post.GameID/d');
+        if(empty($UserID)||empty($GameID)){
+            return json(['code'=>404,'msg'=>'参数为空']);
+        }
+        $UserInfo=acc_acinfo::conn_accounts()
+            ->table('accountsinfo')
+            ->where([
+                ['UserID','=',$UserID],
+                ['GameID','=',$GameID],
+            ])
+            ->field('NickName')
+            ->findOrEmpty();
+
+        if(empty($UserInfo)){
+            return json(['code'=>404,'msg'=>'用户不存在']);
+        }
+        $listInfo=acc_acinfo::conn_accounts()
+            ->table('accountswhitelist')
+            ->where([
+                ['UserID','=',$UserID],
+            ])
+            ->field('NickName')
+            ->findOrEmpty();
+        if($listInfo){
+            return json(['code'=>400,'msg'=>'该用户已在白名单']);
+        }
+        $addResult=acc_acinfo::conn_accounts()
+            ->table('accountswhitelist')
+            ->insert(['UserID'=>$UserID,'GameID'=>$GameID,'NickName'=>$UserInfo['NickName']]);
+
+        if($addResult){
+            return json(['code'=>200,'msg'=>'添加成功']);
+        }else{
+            return json(['code'=>400,'msg'=>'修改失败']);
+        }
+    }
+
+
+
 }

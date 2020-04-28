@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+    <meta charset="utf-8">
+    <title></title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="renderer" content="webkit">
+
+    <!-- Loading Bootstrap -->
+    <!--<link href="__PUBLIC__/admin/css/bootstrap.min.css" rel="stylesheet" type="text/css"/>-->
+    <link href="__PUBLIC__/assets/css/backend.min.css" rel="stylesheet">
+</head>
+
+<body class="inside-header inside-aside " marginwidth="0" marginheight="0">
+<div id="main" role="main">
+    <div class="tab-content tab-addtabs">
+        <div id="content">
+            <div class="row">
+                <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                    <section class="content-header hide">
+                        <h1>
+                            控制台
+                            <small>Control panel</small>
+                        </h1>
+                    </section>
+                    <div class="content">
+                        <div class="panel panel-default panel-intro">
+                            <div class="panel-heading">
+                                <div class="panel-lead">
+                                    <em>添加白名单</em>
+                                    添加允许登录测试的白名单
+                                </div>
+                            </div>
+                            <div class="panel-body">
+                                <div id="myTabContent" class="tab-content">
+
+                                    <div class="tab-pane fade active in" id="basic">
+                                        <div class="widget-body no-padding">
+                                            <form id="basic-form" class="edit-form form-horizontal nice-validator n-default n-bootstrap" role="form" data-toggle="validator" method="POST" action="" novalidate="novalidate">
+                                                <table class="table table-striped">
+                                                    <thead>
+                                                    <tr>
+                                                        <th width="15%">名称</th>
+                                                        <th width="68%">内容</th>
+                                                        <th width="17%"></th>
+                                                    </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                    <tr>
+                                                        <td>用户游戏ID</td>
+                                                        <td>
+                                                            <div class="row">
+                                                                <div class="col-sm-8 col-xs-12">
+                                                                    <input type="text" name="GameID" value="" class="form-control" data-rule="" data-tip="">
+                                                                </div>
+                                                                <div class="col-sm-4"></div>
+                                                            </div>
+
+                                                        </td>
+                                                        <td>
+
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td></td>
+                                                        <td>
+                                                            <button type="button" onclick="search_info()" class="btn btn-success btn-embossed">
+                                                                查询
+                                                            </button>
+                                                        </td>
+                                                    </tr>
+                                                    <tr id="userInfo" class="hidden">
+                                                        <td id="NickName">高昂</td>
+                                                        <td id="RoomCard">120</td>
+                                                        <td>
+                                                            <input type="hidden" id="UserID">
+                                                        </td>
+                                                    </tr>
+
+                                                    </tbody>
+                                                    <tfoot>
+                                                    <tr id="button" class="hidden">
+                                                        <td></td>
+                                                        <td>
+                                                            <button type="button" onclick="submit_diamond()" class="btn btn-success btn-embossed">
+                                                                确定添加
+                                                            </button>
+                                                            <button type="reset" class="btn btn-default btn-embossed">
+                                                                重置
+                                                            </button>
+                                                        </td>
+                                                        <td></td>
+                                                        <td></td>
+                                                    </tr>
+                                                    </tfoot>
+                                                </table>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!--<script src="__PUBLIC__/admin/js/require.min.js" type="text/javascript"></script>-->
+<script src="__PUBLIC__/assets/js/require.min.js" data-main="__PUBLIC__/assets/js/require-backend.min.js?v=1.0.1"></script>
+<script src="__PUBLIC__/admin/js/jquery-1.8.2.min.js"></script>
+<script>
+    function refresh() {
+        self.location.reload();
+    }
+    function search_info(){
+        $GameID = $("input[name='GameID']").val();
+        if($GameID==undefined||$GameID==''){
+            alert('请输入用户游戏ID');
+            return false;
+        }
+        // console.log($GameID);
+        // $('#layui-layer1').addClass('hidden');
+        // $.session.get('login_status');
+        $.ajax({
+            url: "{:url('Consume/search_info')}",
+            type: 'post',
+            dataType: 'json',
+            data: 'GameID=' + $GameID,
+            success: function (data) {
+                // console.log(data);
+                if (data.code == 200) {
+                    $('#userInfo').removeClass('hidden');
+                    $('#button').removeClass('hidden');
+                    $('#NickName').html('昵称：'+data.data.NickName);
+                    $('#RoomCard').html('当前钻石：'+data.data.RoomCard);
+                    $('#UserID').val(data.data.UserID);
+                    // alert(data);
+
+                } else {
+                    alert(data.msg);
+                }
+                // alert(data);
+            },
+            error: function (XMLHttpRequest, textStatus, errorThrown) {
+                alert("服务器返回失败");
+                // location.reload();
+                // alert(XMLHttpRequest.status);
+                // alert(XMLHttpRequest.readyState);
+                // alert(textStatus);
+//请求失败时调用此函数
+            }
+        });
+    }
+    function submit_diamond(){
+        $UserID = $("#UserID").val();
+        $GameID = $("input[name='GameID']").val();
+        if($UserID==undefined||$UserID==''){
+            alert('参数丢失');
+            return false;
+        }
+        // console.log($GameID);
+        // $('#layui-layer1').addClass('hidden');
+        // $.session.get('login_status');
+        $.ajax({
+            url: "{:url('Consume/addWhiteList')}",
+            type: 'post',
+            dataType: 'json',
+            data: 'UserID=' + $UserID + '&GameID='+ $GameID,
+            success: function (data) {
+                // console.log(data);
+                if (data.code == 200) {
+                    // console.log(data);
+                    alert(data.msg);
+                    self.location.reload();
+                } else {
+                    alert(data.msg);
+                }
+                // alert(data);
+            },
+            error: function (XMLHttpRequest, textStatus, errorThrown) {
+                alert("服务器返回失败");
+                // location.reload();
+                // alert(XMLHttpRequest.status);
+                // alert(XMLHttpRequest.readyState);
+                // alert(textStatus);
+//请求失败时调用此函数
+            }
+        });
+    }
+
+</script>
+
+</body>
+</html>

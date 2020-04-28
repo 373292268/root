@@ -31,10 +31,10 @@ class Login extends Controller
 
                 return json([200,'登录成功']);
             }else{
-                return json([403,'密码错误']);
+                return json([500,'账号或密码错误']);
             }
         }else{
-            return json([500,'账号错误']);
+            return json([500,'账号或密码错误']);
         }
     }
 }

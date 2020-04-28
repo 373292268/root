@@ -32,6 +32,8 @@ class Business extends controller
      */
     public function initialize()
     {
+        
+        //大赢家分支
         $UserID = input('post.UserID/d');
         $ClubID = input('post.ClubID/d');
 //        echo $UserID;

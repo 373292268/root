@@ -113,6 +113,8 @@ class User extends Common
         $data=$user_list->toArray();
 //        p($data);
 //        exit;
+//        p($data);
+//        exit;
         $this->assign('list',$data['data']);
         $this->assign('page',$page);
         return $this->fetch('user');

@@ -35,10 +35,15 @@ class Index extends Common
     public function body(){
         $data['reg_count']=acc_acinfo::getUserRegCount();//总注册人数
         $data['score_count']=club::getIntegralCount();//总积分数
+        $data['score_count']=$data['score_count']/100;
         $data['boss_score_sum']=club::getBossScoreSum();//馆主积分总数
+        $data['boss_score_sum']=$data['boss_score_sum']/100;
         $data['agent_score_sum']=club::getAgentScoreSum();//合伙人积分总数
+        $data['agent_score_sum']=$data['agent_score_sum']/100;
         $data['user_score_sum']=club::getUserScoreSum();//用户积分总数
+        $data['user_score_sum']=$data['user_score_sum']/100;
         $data['coffer_score_sum']=club::getUserCofferSum();//用户保险箱总数
+        $data['coffer_score_sum']=$data['coffer_score_sum']/100;
 //        $data['log_count']=acc_acinfo::getUserRegTodayCount();//今日登陆人数
 //        $data['club_count']=club::getClubCount();//俱乐部个数
         $LevelCount=club::getLevelCount();//馆主,一，二，三，四，五级合伙人个数

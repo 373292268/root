@@ -17,6 +17,9 @@ use think\Config;
 
 class Api extends Controller
 {
+
+
+
     /**
      * 获取用户头像
      * API

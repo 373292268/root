@@ -1449,7 +1449,7 @@ class Business extends controller
             if(empty($NewBossInfo)){
                 exitJson(400,'用户不存在');
             }
-            if($NewBossInfo['Agent']==0){
+            if($NewBossInfo['AgentID']==0){
                 exitJson(400,'该用户无创建茶楼权限');
             }
             $userIdentity=2;//该用户为茶楼外用户
@@ -1482,12 +1482,29 @@ class Business extends controller
             ['ClubID','=',$ClubID],
         ])
             ->count();
+        $downDate=clubuser::where([
+            ['ClubID','=',$ClubID],
+            ['DistributorId','=',$UserID]
+        ])
+            ->count();
 //        Db::startTrans();
 //        如果用户是茶楼外用户，直接将该用户加入该茶楼并将楼主给该用户，同时将老楼主踢出茶楼
-//        将楼主给该用户：1.将新楼主UserRight改为3，OpenID改为ClubID
-//                        2.将所有一级代理的DistributorId修改为新楼主的UserID
+
+//        将楼主给该用户：
+//                          1.将所有一级代理以及直属用户的DistributorId修改为新楼主的UserID
+//                          2.将新楼主UserRight改为3，OpenID改为ClubID
+//
 //                        3.修改ClubInfo和ClubGame表中的CreateUserID字段
 //                        4.删除老楼主在ClubUser表中的数据
+//            1.将所有一级代理以及直属用户的DistributorId修改为新楼主的UserID  先设置下级用户防止新楼主是旧楼主下级
+        $updateResult=1;
+        if($downDate>0){
+            $updateResult=clubuser::where([
+                ['ClubID','=',$ClubID],
+                ['DistributorId','=',$UserID],
+            ])
+                ->update(['DistributorId'=>$NewBossInfo['UserID']]);
+        }
         if($userIdentity==2){
 //            1.将新楼主UserRight改为3，OpenID改为ClubID
             $NewAdd=[
@@ -1507,10 +1524,12 @@ class Business extends controller
                 ->update(['CreateUserID'=>$NewBossInfo['UserID'],'NickName'=>$NewBossInfo['NickName']]);
 //        如果用户是茶楼内用户，直接将楼主给该用户，同时将老楼主踢出茶楼
         }elseif($userIdentity==1){
-//            1.将新楼主UserRight改为3，OpenID改为ClubID
+
+//            2.将新楼主UserRight改为3，OpenID改为ClubID，DistributorId改为null
             $NewUpdate=[
                 'UserRight'=>3,
                 'OpenID'=>$ClubID,
+                'Distributor'=>null,
             ];
             $result=clubuser::where([
                 ['GameID','=',$targetGameID],
@@ -1536,12 +1555,8 @@ class Business extends controller
             ])
                 ->update(['CreatUserID'=>$NewBossInfo['UserID']]);
         }
-//            2.将所有一级代理的DistributorId修改为新楼主的UserID
-            $updateResult=clubuser::where([
-                ['ClubID','=',$ClubID],
-                ['UserLevel','=',1]
-            ])
-                ->update(['DistributorId'=>$NewBossInfo['UserID']]);
+
+
 
 
 
@@ -1551,7 +1566,10 @@ class Business extends controller
                 ['UserID','=',$UserID]
             ])
                 ->delete();
-
+            writeLog($result,'转让茶楼.log','result');
+            writeLog($updateResult,'转让茶楼.log','$updateResult');
+            writeLog($infoUpdateResult,'转让茶楼.log','$infoUpdateResult');
+            writeLog($deleteResult,'转让茶楼.log','$deleteResult');
             if($result&&$updateResult&&$infoUpdateResult&&$deleteResult){
 //                Db::commit();
                 exitJson(200,'转让成功');

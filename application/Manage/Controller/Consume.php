@@ -608,7 +608,7 @@ class Consume extends Common
     public function editConfig(){
         $name=input('name/s');
         $value=input('value/s');
-        if(empty($name)||empty($value)){
+        if(empty($name)||!isset($value)){
             return json(['code'=>404,'msg'=>'参数为空']);
         }
         $update_result=acc_acinfo::conn_accounts()

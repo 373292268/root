@@ -12,6 +12,7 @@ namespace app\Client\Controller;
 use app\Client\model\clubinfo;
 use app\Client\model\clubuser;
 use app\Client\model\connect;
+use think\facade\Cache;
 use think\Controller;
 use think\Config;
 
@@ -19,6 +20,106 @@ class Api extends Controller
 {
 
 
+    /**
+     * 进入大厅请求接口
+     * API
+     * 合并getMessage，getWechatMessage，getScollNotice，saveImageNew，getUserDiamond
+     *
+     * @return $status int  状态码
+     * @return $msg string  错误信息
+     * @return $data array  返回数据
+     */
+    public function getEssentialInformation(){
+        $UserID = input('post.UserID/d');//执行者的user_id
+        $image_url = input('post.url/s');//头像网络地址
+        $md5=input('post.md5/s');
+        $sign=input('post.sign/s');//签名
+        if(empty($UserID)||empty($image_url)||empty($md5)||empty($sign)){
+            exitJson(400,'参数错误');
+        }
+        //        签名
+        $status=getSignForApi(input('post.'));
+        if($status==false){
+            exitJson(403,'签名错误');
+        }
+
+        $data['getMessage']=Cache::get('getMessage');
+        if(empty($data['getMessage'])){
+            $data['getMessage']=self::getMessage();
+        }
+
+        $data['getWechatMessage']=Cache::get('getWechatMessage');
+        if(empty($data['getWechatMessage'])){
+            $data['getWechatMessage']=self::getWechatMessage();
+        }
+//        $data['getWechatMessage']=self::getWechatMessage();
+        $data['getScollNotice']=Cache::get('getScollNotice');
+        if(empty($data['getScollNotice'])){
+            $data['getScollNotice']=self::getScollNotice();
+        }
+//        $data['getScollNotice']=self::getScollNotice();
+        $data['saveImageNew']=self::saveImageNew($image_url,$UserID,$md5);
+//        $data['getUserDiamond']=self::getUserDiamondPrivate($UserID);
+
+        exitJson(200,'获取成功',$data);
+    }
+
+
+    /**
+     * 进入俱乐部请求接口
+     * API
+     * 合并getUserMatchScore，getUserDiamond，getClubNotice，getBusinessCard，getRecordStatus
+     *
+     * @return $status int  状态码
+     * @return $msg string  错误信息
+     * @return $data array  返回数据
+     */
+    public function getEnterClubApi(){
+        $UserID = input('post.UserID/d');//执行者的user_id
+        $ClubID = input('post.ClubID/s');//头像网络地址
+        $md5=input('post.md5/s');
+        $sign=input('post.sign/s');//签名
+        if(empty($UserID)||empty($image_url)||empty($md5)||empty($sign)){
+            exitJson(400,'参数错误');
+        }
+        //        签名
+        $status=getSignForApi(input('post.'));
+//        if($status==false){
+//            exitJson(403,'签名错误');
+//        }
+
+
+//        获取记录状态
+        $data['getRecordStatus']=Cache::get('getRecordStatus');
+        if(empty($data['getRecordStatus'])){
+            $data['getRecordStatus']=NewSelect::getRecordStatus();
+        }
+
+//        获取名片信息
+        $data['getBusinessCard']=Cache::get('getBusinessCard');
+        if(empty($data['getBusinessCard'])){
+            $data['getBusinessCard']=NewSelect::getBusinessCard($UserID);
+        }
+//        $data['getWechatMessage']=self::getWechatMessage();
+
+//        获取俱乐部公告
+        $data['getClubNotice']=Cache::get('getClubNotice');
+        if(empty($data['getClubNotice'])){
+            $data['getClubNotice']=self::getClubNotice();
+        }
+//        $data['getScollNotice']=self::getScollNotice();
+
+//        获取用户钻石
+        $data['getUserDiamond']=self::getUserDiamondPrivate($UserID);
+
+
+//        获取用户积分
+        $data['getUserMatchScore']=self::getUserMatchScore();
+
+//        $data['getUserDiamond']=self::getUserDiamondPrivate($UserID);
+
+        exitJson(200,'获取成功',$data);
+    }
 
     /**
      * 获取用户头像
@@ -43,74 +144,8 @@ class Api extends Controller
         }
         exitJson(200,'接收成功',$user_image);
     }
-    /**
-     * 获取公告信息
-     * API
-     *
-     * @return $status int  状态码
-     * @return $msg string  错误信息
-     * @return $data array  返回数据
-     */
-    public function getMessage(){
-//        $sign=input('sign/s');
-//        echo MD5('rwxjianghu3');
-//        exit;
-//        if($key!=md5('rwxjianghu3')){
-//            exitJson(400,"签名错误");
-//        }
 
-        $url=config('config.url');
-//        p($config);
-//        exit;
-//        rynativewebdb
-        $list=connect::conn_platform('rynativewebdb')
-            ->table('ads')
-            ->where(['Type'=>0])
-            ->field('id,title,resourceurl,remark')
-            ->select();
-//        $config=connect::conn_platform('rynativewebdb')
-//            ->table('configinfo')
-//            ->where(['ConfigKey'=>'SiteConfig'])
-//            ->field('field2 as url')
-//            ->findOrEmpty();
-        foreach($list as $key => $val){
-//            p($val);
-            if(!empty($val['resourceurl'])){
-                $list[$key]['resourceurl']=$url.$val['resourceurl'];
-            }
-        }
-        exitJson(200,'获取成功',$list);
-//        p($list);
-//        exit;
-    }
-    /**
-     * 获取微信客服信息
-     * API
-     *
-     * @return $status int  状态码
-     * @return $msg string  错误信息
-     * @return $data array  返回数据
-     */
-    public function getWechatMessage(){
-//        $sign=input('sign/s');
-//        if($key!=md5('rwxjianghu3')){
-//            exitJson(400,"签名错误");
-//        }
-        $config=connect::conn_platform('rynativewebdb')
-            ->table('configinfo')
-            ->where(['ConfigKey'=>'ContactConfig'])
-            ->field('Field3,Field4,Field5,Field6,Field7,Field8')
-            ->findOrEmpty();
 
-        foreach($config as $key => $val){
-            if(!empty($val)){
-                if($key!='row_number'){
-                    $list[$key]=$val;
-                }
-            }
-        }
-        exitJson(200,'获取成功',$list);
-    }
     /**
      * 获取战绩
      * API
@@ -246,86 +281,8 @@ class Api extends Controller
 
     }
 
-    /**
-     * 获取滚动公告
-     * API
-     *
-     * $UserID      用户id
-     * $ClubID      俱乐部id
-     * @return $status int  状态码
-     * @return $msg string  错误信息
-     * @return $data array  返回数据
-     */
 
-    public function getScollNotice(){
-        $UserID = input('post.UserID/d');//执行者的user_id
-        $sign=input('post.sign/s');//签名
 
-        if(empty($UserID)||empty($sign)){
-            exitJson(400,'参数错误');
-        }
-
-//        签名
-        $status=getSignForApi(input('post.'));
-        if($status==false){
-            exitJson(403,'签名错误');
-        }
-//        exitJson(403,'签名错误');
-//        if($sign!=Sign($data)){
-//            exitJson(403,'签名错误');
-//        }
-        $NoticeList=connect::conn_platform('rynativewebdb')
-            ->table('news')
-            ->field('NewsID,Body')
-            ->select();
-//        writeLog($MatchScore);
-//        p($MatchScore);
-//        exit;sss
-        if($NoticeList){
-            exitJson(200, '获取成功',$NoticeList);
-        }else{
-            exitJson(500, '获取失败');
-        }
-
-    }
-
-    /**
-     * 储存头像/更新头像
-     * API
-     *
-     * @return $status int  状态码
-     * @return $msg string  错误信息
-     * @return $data array  返回数据
-     */
-    public function saveImageNew(){
-        $image_url = input('url/s');//头像网络地址
-        $userid = input('userid/d');//user_id
-        $ip = input('ip/s');
-        $machine = input('machine/s');
-        $md5=input('md5/s');
-//        校验参数
-        if(empty($image_url)||empty($userid)||empty($ip)||empty($machine)){
-            exitJson(404,'参数错误');
-        }
-
-        $user_image=connect::conn_platform()->table('accountssend')->where(['UserID'=>$userid])
-            ->field('Head')
-            ->findOrEmpty();
-        if($user_image){
-            if($md5==md5($user_image['Head'])){
-                exitJson(202,'头像不需更新');
-            }
-            $update_result=connect::conn_platform()->table('accountssend')->where(['UserID'=>$userid])->update(['Head'=>$image_url]);
-        }else{
-            $update_result=connect::conn_platform()->table('accountssend')->where(['UserID'=>$userid])->insert(['Head'=>$image_url,'UserID'=>$userid]);
-        }
-
-        if($update_result){
-            exitJson(200,'更新成功');
-        }else{
-            exitJson(204,'更新失败');
-        }
-    }
 
     /**
      * 获取公告
@@ -371,5 +328,171 @@ class Api extends Controller
         }
     }
 
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// ////////////////////////////////////////内部API接口///////////////////////////////////////////////////////////////////////
+    /// ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+    /**
+     * 获取公告信息
+     * 内部接口API
+     *
+     * @return $status int  状态码
+     * @return $msg string  错误信息
+     * @return $data array  返回数据
+     */
+    private function getMessage(){
+//        $sign=input('sign/s');
+//        echo MD5('rwxjianghu3');
+//        exit;
+//        if($key!=md5('rwxjianghu3')){
+//            exitJson(400,"签名错误");
+//        }
+
+        $url=config('config.url');
+//        p($config);
+//        exit;
+//        rynativewebdb
+        $list=connect::conn_platform('rynativewebdb')
+            ->table('ads')
+            ->where(['Type'=>0])
+            ->field('id,title,resourceurl,remark')
+            ->select();
+//        $config=connect::conn_platform('rynativewebdb')
+//            ->table('configinfo')
+//            ->where(['ConfigKey'=>'SiteConfig'])
+//            ->field('field2 as url')
+//            ->findOrEmpty();
+        foreach($list as $key => $val){
+//            p($val);
+            if(!empty($val['resourceurl'])){
+                $list[$key]['resourceurl']=$url.$val['resourceurl'];
+            }
+        }
+        Cache::set('getMassage',$list,3000);
+        return(['code'=>200,'msg'=>'获取成功','data'=>$list]);
+//        p($list);
+//        exit;
+    }
+    /**
+     * 获取微信客服信息
+     * 内部API
+     *
+     * @return $status int  状态码
+     * @return $msg string  错误信息
+     * @return $data array  返回数据
+     */
+    private function getWechatMessage(){
+//        $sign=input('sign/s');
+//        if($key!=md5('rwxjianghu3')){
+//            exitJson(400,"签名错误");
+//        }
+        $config=connect::conn_platform('rynativewebdb')
+            ->table('configinfo')
+            ->where(['ConfigKey'=>'ContactConfig'])
+            ->field('Field3,Field4,Field5,Field6,Field7,Field8')
+            ->findOrEmpty();
+
+        foreach($config as $key => $val){
+            if(!empty($val)){
+                if($key!='row_number'){
+                    $list[$key]=$val;
+                }
+            }
+        }
+        Cache::set('getWechatMessage',$list,3000);
+//        exitJson(200,'获取成功',$list);
+        return(['code'=>200,'msg'=>'获取成功','data'=>$list]);
+    }
+    /**
+     * 获取滚动公告
+     * API
+     *
+     * $UserID      用户id
+     * $ClubID      俱乐部id
+     * @return $status int  状态码
+     * @return $msg string  错误信息
+     * @return $data array  返回数据
+     */
+
+    private function getScollNotice(){
+//        exitJson(403,'签名错误');
+//        if($sign!=Sign($data)){
+//            exitJson(403,'签名错误');
+//        }
+        $NoticeList=connect::conn_platform('rynativewebdb')
+            ->table('news')
+            ->field('NewsID,Body')
+            ->cache('getScollNotice',0)
+            ->select();
+//        writeLog($MatchScore);
+//        p($MatchScore);
+//        exit;sss
+        Cache::set('getScollNotice',$NoticeList,3000);
+        if($NoticeList){
+            return(['code'=>200,'msg'=>'获取成功','data'=>$NoticeList]);
+        }else{
+            return(['code'=>500,'msg'=>'获取失败']);
+        }
+
+    }
+    /**
+     * 储存头像/更新头像
+     * API
+     *
+     * @return $status int  状态码
+     * @return $msg string  错误信息
+     * @return $data array  返回数据
+     */
+    private function saveImageNew($image_url,$userid,$md5){
+//        校验参数
+        if(empty($image_url)||empty($userid)||empty($md5)){
+            return(['code'=>400,'msg'=>'参数错误']);
+        }
+
+        $user_image=connect::conn_platform()->table('accountssend')->where(['UserID'=>$userid])
+            ->field('Head')
+            ->findOrEmpty();
+        if($user_image){
+            if($md5==md5($user_image['Head'])){
+                return(['code'=>202,'msg'=>'头像不需要更新']);
+            }
+            $update_result=connect::conn_platform()->table('accountssend')->where(['UserID'=>$userid])->update(['Head'=>$image_url]);
+        }else{
+            $update_result=connect::conn_platform()->table('accountssend')->where(['UserID'=>$userid])->insert(['Head'=>$image_url,'UserID'=>$userid]);
+        }
+
+        if($update_result){
+            return(['code'=>200,'msg'=>'更新成功']);
+        }else{
+            return(['code'=>204,'msg'=>'更新失败']);
+        }
+    }
+    /**
+     * 获取用户钻石
+     * API
+     *
+     * $UserID      用户id
+     * $ClubID      俱乐部id
+     * @return $status int  状态码
+     * @return $msg string  错误信息
+     * @return $data array  返回数据
+     */
+
+    private function getUserDiamondPrivate($UserID){
+
+        if(empty($UserID)){
+            return(['code'=>400,'msg'=>'参数错误']);
+        }
+
+        $MatchScore=connect::conn_platform('RYTreasureDB')->table('userroomcard')->where(['UserID'=>$UserID])->field('roomcard')->findOrEmpty();
+
+        if($MatchScore){
+            return(['code'=>200,'msg'=>'获取成功','data'=>$MatchScore]);
+        }else{
+            return(['code'=>500,'msg'=>'获取失败']);
+        }
+
+    }
 }

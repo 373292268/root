@@ -13,6 +13,7 @@ use app\Manage\model\acc_acinfo;
 use app\Manage\model\club;
 use app\Manage\model\web;
 use Think\Db;
+use think\facade\Cache;
 use think\Request;
 
 class Consume extends Common
@@ -249,6 +250,20 @@ class Consume extends Common
 
 
         if($noticeInfo==1){
+            $getMassage=Cache::get('getMassage');
+            if(!empty($getMassage)){
+                foreach($getMassage as $key =>$val){
+                    if($val['id']!=$ID){
+                        continue;
+                    }
+                    $getMassage[$key]['title']=$title;
+                    $getMassage[$key]['remark']=$body;
+                    if(!empty(request()->file())){
+                        $getMassage[$key]['resourceurl']=$deal_img['msg'];
+                    }
+                }
+            }
+            writeLog($getMassage,'修改消息.log');
             $this->success('更新成功');
         }else{
             $this->error('更新失败');

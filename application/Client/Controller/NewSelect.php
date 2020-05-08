@@ -54,6 +54,38 @@ class NewSelect extends Controller
             exitJson(404,'参数缺失');
         }
     }
+    public static function identity()
+    {
+        $UserID = input('post.UserID/d');
+        $ClubID = input('post.ClubID/d');
+//        echo $UserID;
+
+
+//        echo $ClubID;
+//        writeLog(input(),'input.log','initialize'.$UserID.'ClubID='.$ClubID);
+        if($UserID&&$ClubID){
+//            $user=new user();
+            $info=clubuser::getUserClubInfo($UserID,$ClubID,'UserRight');
+
+//            var_dump(empty($info->userid));
+//            exit;
+            if(empty($info)){
+                exitJson(404,'用户不存在');
+            }
+            $level=$info['UserRight'];
+            if($level==1){
+                $_SESSION['level']='partner';
+            }elseif($level==2){
+                $_SESSION['level']='manager';
+            }elseif($level==3){
+                $_SESSION['level']='boss';
+            }else{
+                $_SESSION['level']='normal';
+            }
+        }else{
+            exitJson(404,'参数缺失');
+        }
+    }
 //-------------------------------------------成员------------------------------------------------------
     /**
      * 获取成员列表页面信息
@@ -1051,28 +1083,29 @@ class NewSelect extends Controller
      * @return $msg string  错误信息
      * @return $data array  返回数据
      */
-    public function getBusinessCard(){
-        $UserID = input('post.UserID/d');//自己的user_id
-        $ClubID = input('post.ClubID/d');//俱乐部id
-        $sign=input('post.sign/s');//签名
+    public static function getBusinessCard($UserID,$ClubID){
+//        $UserID = input('post.UserID/d');//自己的user_id
+//        $ClubID = input('post.ClubID/d');//俱乐部id
+//        $sign=input('post.sign/s');//签名
 //        p($NickName);
 //        p(mb_strlen('测试','utf8'));
 //        exit;
         //根据茶馆设置查询权限
-        if(empty($UserID)||empty($ClubID)||empty($sign)){
-            exitJson(400,'参数错误');
-        }
-
-        //        签名
-        $status=getSignForApi(input('post.'));
-        if($status==false){
-            exitJson(403,'签名错误');
-        }
+//        if(empty($UserID)||empty($ClubID)||empty($sign)){
+//            exitJson(400,'参数错误');
+//        }
+//
+//        //        签名
+//        $status=getSignForApi(input('post.'));
+//        if($status==false){
+//            exitJson(403,'签名错误');
+//        }
 
 //        exitJson(403,'签名错误');
 //        if($sign!=Sign($data)){
 //            exitJson(403,'签名错误');
 //        }
+        self::identity();
 //        如果是楼主，则只显示自己的名片设置
         if($_SESSION['level']=='boss'){
             $self=clubuser::where([
@@ -1126,13 +1159,16 @@ class NewSelect extends Controller
                 'upCard'=>$upCard
             ];
         }else{
-            exitJson(400,'身份有误');
+            return(['code'=>400, 'msg'=>'身份有误']);
         }
 
         if($data){
-            exitJson(200,'获取成功',$data);
+
+//            exitJson(200,'获取成功',$data);
+            return(['code'=>200, 'msg'=>'获取成功','data'=>$data]);
         }else{
-            exitJson(500,'获取失败');
+            return(['code'=>500, 'msg'=>'获取失败']);
+//            exitJson(500,'获取失败');
         }
 
     }
@@ -1148,25 +1184,25 @@ class NewSelect extends Controller
      * @return $msg string  错误信息
      * @return $data array  返回数据
      */
-    public function getRecordStatus(){
-        $UserID = input('UserID/d');
-        $ClubID = input('ClubID/d');
-        $sign = input('sign/s');
+    public static function getRecordStatus($UserID,$ClubID){
+//        $UserID = input('UserID/d');
+//        $ClubID = input('ClubID/d');
+//        $sign = input('sign/s');
 
 
-        if(empty($UserID)||empty($ClubID)||empty($sign)){
-            exitJson(400,'参数错误');
-        }
-        if($_SESSION['level']!='boss'&&$_SESSION['level']!='manager'&&$_SESSION['level']!='partner'){
-            exitJson(401,'无权限');
-        }
+//        if(empty($UserID)||empty($ClubID)||empty($sign)){
+//            exitJson(400,'参数错误');
+//        }
+//        if($_SESSION['level']!='boss'&&$_SESSION['level']!='manager'&&$_SESSION['level']!='partner'){
+//            exitJson(401,'无权限');
+//        }
 
-        $status=getSignForApi(input('post.'));
-        if($status==false){
-            exitJson(403,'签名错误');
-        }
+//        $status=getSignForApi(input('post.'));
+//        if($status==false){
+//            exitJson(403,'签名错误');
+//        }
 
-
+        self::identity();
         ///////对接客户端所需要数据
         $joinStatus=clubuseroutinrecord::where([
             ['ClubID','=',$ClubID],
@@ -1183,7 +1219,7 @@ class NewSelect extends Controller
         ])
             ->count();
         $Status=['joinStatus'=>$joinStatus,'exitStatus'=>$exitStatus];
-        exitJson(200, '审核列表',$Status);
+        return(['code'=>200, 'msg'=>'审核列表','data'=>$Status]);
     }
 
 //-------------------------------------------记录------------------------------------------------------

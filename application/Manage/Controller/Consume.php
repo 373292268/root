@@ -458,7 +458,10 @@ class Consume extends Common
             ->findOrEmpty();
         Db::startTrans();
         if(empty($UserBeforeRoomCard)){
-            return json(['code'=>404,'msg'=>'用户不存在']);
+            acc_acinfo::conn_accounts('rytreasuredb')
+                ->table('userroomcard')
+                ->insert(['UserID'=>$UserID,'RoomCard'=>0]);
+            $UserBeforeRoomCard['RoomCard']=0;
         }
         $result=acc_acinfo::conn_accounts('rytreasuredb')
             ->table('userroomcard')

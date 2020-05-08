@@ -76,37 +76,39 @@ class Api extends Controller
      */
     public function getEnterClubApi(){
         $UserID = input('post.UserID/d');//执行者的user_id
-        $ClubID = input('post.ClubID/s');//头像网络地址
-        $md5=input('post.md5/s');
+        $ClubID = input('post.ClubID/s');//俱乐部id
         $sign=input('post.sign/s');//签名
-        if(empty($UserID)||empty($image_url)||empty($md5)||empty($sign)){
+        if(empty($UserID)||empty($ClubID)||empty($sign)){
             exitJson(400,'参数错误');
         }
         //        签名
         $status=getSignForApi(input('post.'));
-//        if($status==false){
-//            exitJson(403,'签名错误');
-//        }
+        if($status==false){
+            exitJson(403,'签名错误');
+        }
 
 
 //        获取记录状态
-        $data['getRecordStatus']=Cache::get('getRecordStatus');
-        if(empty($data['getRecordStatus'])){
-            $data['getRecordStatus']=NewSelect::getRecordStatus();
-        }
-
-//        获取名片信息
-        $data['getBusinessCard']=Cache::get('getBusinessCard');
-        if(empty($data['getBusinessCard'])){
-            $data['getBusinessCard']=NewSelect::getBusinessCard($UserID);
-        }
-//        $data['getWechatMessage']=self::getWechatMessage();
+//        $data['getRecordStatus']=Cache::get('getRecordStatus');
+//        if(empty($data['getRecordStatus'])){
+            $data['getRecordStatus']=NewSelect::getRecordStatus($UserID,$ClubID);
+//        }
 
 //        获取俱乐部公告
-        $data['getClubNotice']=Cache::get('getClubNotice');
-        if(empty($data['getClubNotice'])){
-            $data['getClubNotice']=self::getClubNotice();
-        }
+//        $data['getClubNotice']=Cache::get('getClubNotice');
+//        if(empty($data['getClubNotice'])){
+            $data['getClubNotice']=self::getClubNotice($UserID,$ClubID);
+//        }
+
+
+//        获取名片信息
+//        $data['getBusinessCard']=Cache::get('getBusinessCard');
+//        if(empty($data['getBusinessCard'])){
+            $data['getBusinessCard']=NewSelect::getBusinessCard($UserID,$ClubID);
+//        }
+//        $data['getWechatMessage']=self::getWechatMessage();
+
+
 //        $data['getScollNotice']=self::getScollNotice();
 
 //        获取用户钻石
@@ -114,7 +116,7 @@ class Api extends Controller
 
 
 //        获取用户积分
-        $data['getUserMatchScore']=self::getUserMatchScore();
+        $data['getUserMatchScore']=self::getUserMatchScorePrivate($UserID,$ClubID);
 
 //        $data['getUserDiamond']=self::getUserDiamondPrivate($UserID);
 
@@ -145,7 +147,48 @@ class Api extends Controller
         exitJson(200,'接收成功',$user_image);
     }
 
+    /**
+     * 获取战绩总计
+     * API
+     *
+     * @return $status int  状态码
+     * @return $msg string  错误信息
+     * @return $data array  返回数据
+     */
+    public function getStatistics(){
+        $ClubID=input('post.ClubID/d');
+        $UserID=input('post.UserID/d');
+        $Type=input('post.Type/d');//2,前天,1，昨天,0，今天
+        switch ($Type){
+            case 0:
+                $where='DATEDIFF(DAY,ConcludeTime,GETDATE())=0';
+                break;
+            case 1:
+                $where='DATEDIFF(DAY,ConcludeTime,GETDATE())=1';
+                break;
+            case 2:
+                $where='DATEDIFF(DAY,ConcludeTime,GETDATE())=2';
+                break;
+            default:
+                exitJson(400,'参数错误');
+                break;
+        }
 
+            $data=connect::conn_platform('rytreasuredb')
+                ->table('recordusergamebigend')
+                ->where(['UserID'=>$UserID,'LockClubID'=>$ClubID])
+                ->where($where)
+                ->field('count(1) as count,sum(WinScore) as sum,sum(BigWiner) as winner')
+                ->findOrEmpty();
+            $data['sum']=$data['sum']==null?0:$data['sum'];
+        $data['winner']=$data['winner']==null?0:$data['winner'];
+        if(empty($data)){
+            exitJson(400,'获取失败');
+        }else{
+            exitJson(200,'获取成功',$data);
+        }
+
+    }
     /**
      * 获取战绩
      * API
@@ -192,7 +235,8 @@ class Api extends Controller
                 ->order('ConcludeTime desc')
                 ->limit(60)
                 ->select();
-//                ->toArray();
+//          p($data);
+//          exit;
         }
         if(empty($list)){
             exitJson(400,'数据为空');
@@ -269,7 +313,7 @@ class Api extends Controller
 //        if($sign!=Sign($data)){
 //            exitJson(403,'签名错误');
 //        }
-        $MatchScore=connect::conn_platform('RYTreasureDB')->table('userroomcard')->where(['UserID'=>$UserID])->field('roomcard')->findOrEmpty();
+        $MatchScore=connect::conn_platform('rytreasuredb')->table('userroomcard')->where(['UserID'=>$UserID])->field('roomcard')->findOrEmpty();
 //        writeLog($MatchScore);
 //        p($MatchScore);
 //        exit;sss
@@ -294,19 +338,19 @@ class Api extends Controller
      * @return $msg string  错误信息
      * @return $data array  返回数据
      */
-    public function getClubNotice(){
-        $UserID = input('post.UserID/d');//自己的user_id
-        $ClubID = input('post.ClubID/d');//俱乐部id
-        $sign=input('post.sign/s');//签名
+    private function getClubNotice($UserID,$ClubID){
+//        $UserID = input('post.UserID/d');//自己的user_id
+//        $ClubID = input('post.ClubID/d');//俱乐部id
+//        $sign=input('post.sign/s');//签名
 
-        if(empty($UserID)||empty($ClubID)||empty($sign)){
-            exitJson(400,'参数错误');
+        if(empty($UserID)||empty($ClubID)){
+            return(['code'=>400,'msg'=>'参数错误']);
         }
         //        签名
-        $status=getSignForApi(input('post.'));
-        if($status==false){
-            exitJson(403,'签名错误');
-        }
+//        $status=getSignForApi(input('post.'));
+//        if($status==false){
+//            exitJson(403,'签名错误');
+//        }
 
 //        exitJson(403,'签名错误');
 //        if($sign!=Sign($data)){
@@ -322,9 +366,9 @@ class Api extends Controller
 
 
         if($ClubNotice){
-            exitJson(200,'获取公告成功',$ClubNotice['ClubNotice']);
+            return(['code'=>200,'msg'=>'获取公告成功','data'=>$ClubNotice['ClubNotice']]);
         }else{
-            exitJson(500,'获取失败');
+            return(['code'=>500,'msg'=>'获取失败']);
         }
     }
 
@@ -486,7 +530,37 @@ class Api extends Controller
             return(['code'=>400,'msg'=>'参数错误']);
         }
 
-        $MatchScore=connect::conn_platform('RYTreasureDB')->table('userroomcard')->where(['UserID'=>$UserID])->field('roomcard')->findOrEmpty();
+        $MatchScore=connect::conn_platform('rytreasuredb')->table('userroomcard')->where(['UserID'=>$UserID])->field('roomcard')->findOrEmpty();
+
+        if($MatchScore){
+            return(['code'=>200,'msg'=>'获取成功','data'=>$MatchScore]);
+        }else{
+            return(['code'=>500,'msg'=>'获取失败']);
+        }
+
+    }
+    /**
+     * 获取用户积分
+     * API
+     *
+     * $UserID      用户id
+     * $ClubID      俱乐部id
+     * @return $status int  状态码
+     * @return $msg string  错误信息
+     * @return $data array  返回数据
+     */
+
+    private function getUserMatchScorePrivate($UserID,$ClubID){
+//        $UserID = input('post.UserID/d');//执行者的user_id
+//        $ClubID = input('post.ClubID/d');//俱乐部id
+//        $sign=input('post.sign/s');//签名
+
+        if(empty($UserID)||empty($ClubID)){
+            return(['code'=>400,'msg'=>'参数错误']);
+        }
+
+
+        $MatchScore=clubuser::where(['ClubID'=>$ClubID,'UserID'=>$UserID])->field('matchscore')->findOrEmpty()->toArray();
 
         if($MatchScore){
             return(['code'=>200,'msg'=>'获取成功','data'=>$MatchScore]);

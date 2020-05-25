@@ -66,7 +66,8 @@ class NewSelect extends Controller
         if($UserID&&$ClubID){
 //            $user=new user();
             $info=clubuser::getUserClubInfo($UserID,$ClubID,'UserRight');
-
+//            p($info);
+//            exit;
 //            var_dump(empty($info->userid));
 //            exit;
             if(empty($info)){

@@ -178,9 +178,10 @@ class Api extends Controller
                 ->table('recordusergamebigend')
                 ->where(['UserID'=>$UserID,'LockClubID'=>$ClubID])
                 ->where($where)
-                ->field('count(1) as count,sum(WinScore) as sum,sum(BigWiner) as winner')
+                ->field('count(1) as count,(sum(WinScore) + sum(Revenue)) as sum,sum(BigWiner) as winner')
                 ->findOrEmpty();
-            $data['sum']=$data['sum']==null?0:$data['sum'];
+//        writeLog($data);
+        $data['sum']=$data['sum']==null?0:$data['sum'];
         $data['winner']=$data['winner']==null?0:$data['winner'];
         if(empty($data)){
             exitJson(400,'获取失败');

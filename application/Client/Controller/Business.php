@@ -325,7 +325,7 @@ class Business extends controller
                 exitJson(403, '无权限');
         }
 //        查询俱乐部管理积分方式
-        $clubInfo=clubinfo::where(['ClubID'=>$ClubID])->field('ScoreRight')->findOrEmpty()->toArray();
+        $clubInfo=clubinfo::where(['ClubID'=>$ClubID])->field('ScoreRight,MaxMatchScore,NowMatchScore')->findOrEmpty()->toArray();
 //        p($clubInfo);
 //        exit;
         $ScoreRight=$clubInfo['ScoreRight'];//获取俱乐部积分操作模式
@@ -403,7 +403,19 @@ class Business extends controller
 //            进行字段相加，若下分，则操作者加上个正值，若上分，则加上个负值
             //改变的是操作者的保险箱数据
             clubuser::setUserCoffer($UserID,$ClubID,$self_change_score);
+        }else{//如果执行者是楼主，且是给自己上下分
+//            计算本次发行或收回积分以后，是否超过最高限制
+                $MatchScoreRest=$clubInfo['NowMatchScore']+$score;
+                if($MatchScoreRest>$clubInfo['MaxMatchScore']){
+                    exitJson(403,'超过最高限制，请联系平台');
+                }elseif($MatchScoreRest>0&&$MatchScoreRest<=$clubInfo['MaxMatchScore']){
+                    clubinfo::where([['ClubID','=',$ClubID]])->setInc('NowMatchScore',$score);
+                }else{
+                    exitJson(403,'超过最高限制，请联系平台');
+                }
         }
+
+
         //调整被调整者积分
         //如果大于0则是上分，修改身上携带积分
         //如果小于0则是下分，修改保险箱中积分
@@ -1529,7 +1541,7 @@ class Business extends controller
             $NewUpdate=[
                 'UserRight'=>3,
                 'OpenID'=>$ClubID,
-                'Distributor'=>null,
+                'DistributorId'=>null,
             ];
             $result=clubuser::where([
                 ['GameID','=',$targetGameID],
@@ -1556,8 +1568,20 @@ class Business extends controller
                 ->update(['CreatUserID'=>$NewBossInfo['UserID']]);
         }
 
-
-
+//        获取老楼主的信息并将身上积分转给新楼主
+        $OldBossInfo=clubuser::where([
+            ['ClubID','=',$ClubID],
+            ['UserID','=',$UserID]
+        ])
+            ->field('MatchScore,Coffer')
+            ->findOrEmpty()
+            ->toArray();
+//        writeLog($OldBossInfo,'转让茶楼.log','OldBossInfo');
+        clubuser::where([
+            ['UserID','=',$UserID],
+            ['ClubID','=',$ClubID],
+        ])
+            ->update(['MatchScore'=>$OldBossInfo['MatchScore'],'Coffer'=>$OldBossInfo['Coffer']]);
 
 
 //           4.删除老楼主在ClubUser表中的数据
@@ -1566,6 +1590,7 @@ class Business extends controller
                 ['UserID','=',$UserID]
             ])
                 ->delete();
+
             writeLog($result,'转让茶楼.log','result');
             writeLog($updateResult,'转让茶楼.log','$updateResult');
             writeLog($infoUpdateResult,'转让茶楼.log','$infoUpdateResult');

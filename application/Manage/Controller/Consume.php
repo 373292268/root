@@ -114,6 +114,9 @@ class Consume extends Common
     public function indexWhite(){
         return $this->fetch('indexWhite');
     }
+    public function ScoreUpLimit(){
+        return $this->fetch('ScoreUpLimit');
+    }
     /**
      * 新增公告
      * 公告
@@ -431,6 +434,38 @@ class Consume extends Common
         }
     }
     /**
+     * 获取茶楼信息
+     * ajax
+     *
+     * $ClubID      茶楼ID
+     *
+     * @return $status int  状态码
+     * @return $msg string  错误信息
+     * @return $data array  返回数据
+     */
+    public function search_club_info(){
+        $ClubID=input('ClubID/d');
+        if(empty($ClubID)){
+            return json(['code'=>404,'msg'=>'参数为空']);
+        }
+//        Db::startTrans();
+        $userInfo=club::conn_platform()
+            ->table('clubinfo')
+            ->where(['ClubID'=>$ClubID])
+            ->field('NickName,MaxMatchScore,NowMatchScore,ClubID')
+            ->findOrEmpty();
+
+//        writeLog($userInfo,'search_info.log');
+//        exit;
+        if($userInfo){
+//            Db::commit();//执行
+            return json(['code'=>200,'msg'=>'获取成功','data'=>$userInfo]);
+        }else{
+//            Db::rollback();//回滚
+            return json(['code'=>400,'msg'=>'茶楼不存在']);
+        }
+    }
+    /**
      * 充值钻石
      * ajax
      *
@@ -488,6 +523,50 @@ class Consume extends Common
         if($result&&$add_result){
             Db::commit();//执行
             return json(['code'=>200,'msg'=>'充值成功','data'=>$UserRoomCard['RoomCard']]);
+        }else{
+            Db::rollback();//回滚
+            return json(['code'=>400,'msg'=>'充值失败']);
+        }
+    }
+
+    /**
+     * 设置积分上限
+     * ajax
+     *
+     * $UserID      用户id
+     *
+     * @return $status int  状态码
+     * @return $msg string  错误信息
+     * @return $data array  返回数据
+     */
+    public function setClubUpLimit(){
+        $ClubID=input('ClubID/d');
+        $Number=input('Number/d')*100;
+//        writeLog(input());
+
+        if(empty($ClubID)||empty($Number)){
+            return json(['code'=>404,'msg'=>'参数为空']);
+        }
+//        查询俱乐部信息
+        $ClubInfo=club::conn_platform()
+            ->table('clubinfo')
+            ->where([
+                ['ClubID','=',$ClubID]
+            ])
+            ->field('MaxMatchScore,NowMatchScore')
+            ->findOrEmpty();
+        if($Number<$ClubInfo['NowMatchScore']){
+            return json(['code'=>403,'msg'=>'已发行积分高于设置值']);
+        }
+        $result=club::conn_platform()
+            ->table('clubinfo')
+            ->where([
+                ['ClubID','=',$ClubID]
+            ])
+            ->update(['MaxMatchScore'=>$Number]);
+        if($result){
+            Db::commit();//执行
+            return json(['code'=>200,'msg'=>'充值成功','data'=>$Number]);
         }else{
             Db::rollback();//回滚
             return json(['code'=>400,'msg'=>'充值失败']);

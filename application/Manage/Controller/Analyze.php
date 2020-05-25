@@ -53,6 +53,45 @@ class Analyze extends Common
 
         return $this->fetch('DiamondRecord');
     }
+
+    /**
+     * 在线人数
+     * 分析
+     *
+     * $type        查询类型
+     * $condition   查询条件
+     * @return $status int  状态码
+     * @return $msg string  错误信息
+     * @return $data array  返回数据
+     */
+    public function OnlineCount(){
+        $time=strtotime(date('Y-m-d'));
+        $time=$time-24*3600*6;
+        $avg=array();
+        $atime=array();
+        for($i=0;$i<7;$i++){
+            $t=date('Y-m-d',$time);
+            $atime[]=$t;
+            $avg[]=$i;
+            $time=$time+24*3600;
+        }
+        foreach ($atime as $key => $val){
+//            echo $val;
+//            exit;
+            $date_data['reg'][]=acc_acinfo::conn_accounts()->table('accountsinfo')->where("convert(nvarchar(10),RegisterDate,120)='".$val."'")->count();
+            $date_data['login'][]=acc_acinfo::conn_accounts()->table('recorduserlogondaytime')->where("convert(nvarchar(10),LogonTime,120)='".$val."'")->count();
+        }
+//        p($atime);
+//        exit;
+        $atime=json_encode($atime,true);
+        $atime=str_replace('"', '\'', $atime);
+        $atime=str_replace('[', '', $atime);
+        $atime=str_replace(']', '', $atime);
+        $reg=json_encode($date_data['reg'],true);
+
+        $login=json_encode($date_data['login'],true);
+        return $this->fetch('OnlineCount');
+    }
     /**
      * 统计本月钻石消耗
      * ajax

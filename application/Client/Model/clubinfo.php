@@ -17,7 +17,7 @@ class clubinfo extends Model
      * @return string
      */
     static function IncClubNumberPeople($ClubID){
-        $MatchScore=clubuser::where(['ClubID'=>$ClubID])->setInc('ClubPlayerCount');
+        $MatchScore=clubinfo::where(['ClubID'=>$ClubID])->setInc('ClubPlayerCount');
         return $MatchScore;
     }
 }

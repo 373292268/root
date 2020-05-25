@@ -67,7 +67,7 @@ class Index extends Common
 //            echo $val;
 //            exit;
             $date_data['reg'][]=acc_acinfo::conn_accounts()->table('accountsinfo')->where("convert(nvarchar(10),RegisterDate,120)='".$val."'")->count();
-            $date_data['login'][]=acc_acinfo::conn_accounts()->table('accountsinfo')->where("convert(nvarchar(10),LastLogonDate,120)='".$val."'")->count();
+            $date_data['login'][]=acc_acinfo::conn_accounts()->table('recorduserlogondaytime')->where("convert(nvarchar(10),LogonTime,120)='".$val."'")->count();
         }
 //        p($atime);
 //        exit;

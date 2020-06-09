@@ -408,7 +408,7 @@ class Business extends controller
                 $MatchScoreRest=$clubInfo['NowMatchScore']+$score;
                 if($MatchScoreRest>$clubInfo['MaxMatchScore']){
                     exitJson(403,'超过最高限制，请联系平台');
-                }elseif($MatchScoreRest>0&&$MatchScoreRest<=$clubInfo['MaxMatchScore']){
+                }elseif($MatchScoreRest>=0&&$MatchScoreRest<=$clubInfo['MaxMatchScore']){
                     clubinfo::where([['ClubID','=',$ClubID]])->setInc('NowMatchScore',$score);
                 }else{
                     exitJson(403,'超过最高限制，请联系平台');
@@ -828,6 +828,7 @@ class Business extends controller
                 'DistributorID'=>$userInfo['DistributorId'],
                 'Status'=>1
             ]);
+
             if($Result){
                 exitJson(202,'已退出');
             }
@@ -1847,6 +1848,10 @@ class Business extends controller
                     'TypeID'=>0,//0自退 1被踢
                     'OperateUserID'=>$UserID,
                 ]);
+                clubinfo::where([
+                    ['ClubID','=',$ClubID],
+                ])
+                    ->setDec('ClubPlayerCount');
 //                    删除用户
                 $Result=clubuser::where([
                     ['UserID','=',$DeletedUserID],
@@ -1894,20 +1899,35 @@ class Business extends controller
 //
 
 //        修改下级玩家包括合伙人的DistributorId.合伙人和普通玩家的DistributorId都是上级UserID
+//        先查询下是否有下级
+        $downCount=clubuser::where(['DistributorId'=>$DeletedUserID,'ClubID'=>$ClubID])->count();
+        if($downCount>0){
             $downUpdate=clubuser::where(['DistributorId'=>$DeletedUserID,'ClubID'=>$ClubID])->update(['DistributorId'=>$DeleteInfo['DistributorId']]);
+        }else{
+            $downUpdate=0;
+        }
+
 //        修改下级合伙人的UserLevel
 //        clubuser::where(['AgentDistributorId'=>$DeletedUserID,'ClubID'=>$ClubID])->setInc('UserLevel');
 //        继而修改下级合伙人的AgentDistributorId以及UserRight,DistributorId在上边已经修改过
+//        先查询下是否有下级
+        $downAgentCount=clubuser::where(['AgentDistributorId'=>$DeletedUserID,'ClubID'=>$ClubID,'UserRight'=>1])->count();
+        if($downAgentCount>0){
             $downAgentUpdate=clubuser::where(['AgentDistributorId'=>$DeletedUserID,'ClubID'=>$ClubID,'UserRight'=>1])->update(['AgentDistributorId'=>$DeleteInfo['DistributorId']]);
+        }else{
+            $downAgentUpdate=0;
+        }
+
 //            修改下级合伙人的等级
         if($DeleteInfo['UserLevel']!=1) {
             clubuser::where(['AgentDistributorId' => $DeletedUserID, 'ClubID' => $ClubID, 'UserRight' => 1])->setDec('UserLevel');
         }else{
             clubuser::where(['AgentDistributorId' => $DeletedUserID, 'ClubID' => $ClubID, 'UserRight' => 1])->update(['UserLevel'=>1]);
         }
-            if($downUpdate&&$downAgentUpdate){
-                $status=1;
-            }
+
+        if(($downUpdate==$downCount)&&($downAgentUpdate==$downAgentCount)){
+            $status=1;
+        }
             $result=clubuser::where(['UserID'=>$DeletedUserID,'ClubID'=>$ClubID])->update(['AgentDistributorId'=>0,'UserRight'=>0,'UserLevel'=>0]);
 //        }else{
 //            //        修改一级合伙人下级玩家包括合伙人的DistributorId.升级为一级合伙人或楼主下级玩家后，合伙人和普通玩家的DistributorId都是NULL

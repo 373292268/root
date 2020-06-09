@@ -14,7 +14,7 @@ class Common extends Controller
 {
     public function initialize(){
         session('menu',null);
-        $menu=auth_rule::where(['pid'=>0])->select()->toArray();
+        $menu=auth_rule::where(['pid'=>0,'status'=>1])->select()->toArray();
         foreach ($menu as $key=>$val)
         {
             $menu[$key]['action'] =  auth_rule::where(array('pid'=>$val['id'],'status'=>1))->order('sort asc')->select()->toArray();

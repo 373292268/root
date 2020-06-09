@@ -105,7 +105,7 @@ class Api extends Controller
 //        $data['getBusinessCard']=Cache::get('getBusinessCard');
 //        if(empty($data['getBusinessCard'])){
             $data['getBusinessCard']=NewSelect::getBusinessCard($UserID,$ClubID);
-//        }
+//        }-
 //        $data['getWechatMessage']=self::getWechatMessage();
 
 

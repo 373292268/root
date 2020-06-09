@@ -43,6 +43,93 @@ class clubuser extends Model
             ->toArray();
         return $userList;
     }
+    /**new  湖南项目
+     * 管理获取成员列表
+     * @access static
+     * @return string
+     */
+    static function getUserListForBoss_hunan($UserID,$ClubID){
+        $userList = clubuser::alias('cu')
+            ->where([
+                ['cu.ClubID','=',$ClubID],
+                ['Reviewed','>',0]
+            ])
+//            ->leftJoin('RYTreasureDBLink.RYTreasureDB.dbo.recordusergamebigend rugbe','rugbe.UserID = cu.UserID')
+            ->field('
+            cu.UserID,
+            cu.GameID,
+            cu.NickName,
+            MatchScore+Coffer as MatchScore,
+            cu.Reviewed,
+            cu.UserRight,
+            (select sum(TeaChange) from RYRecordDBLink.RYRecordDB.dbo.recrodteainfo where RelationID = cu.UserID and ClubID = cu.ClubID and DATEDIFF(DAY,RecordDate,GETDATE())=1) as ContributionValue,
+            (select count(*) from RYTreasureDBLink.RYTreasureDB.dbo.recordusergamebigend where UserID = cu.UserID and LockClubID = cu.ClubID and DATEDIFF(DAY,ConcludeTime,GETDATE())=1) as count,
+            (select sum(WinScore) from RYTreasureDBLink.RYTreasureDB.dbo.recordusergamebigend where UserID = cu.UserID and LockClubID = cu.ClubID and DATEDIFF(DAY,ConcludeTime,GETDATE())=1) as YesterdayScore,
+            (select sum(WinScore) from RYTreasureDBLink.RYTreasureDB.dbo.recordusergamebigend where UserID = cu.UserID and LockClubID = cu.ClubID and DATEDIFF(DAY,ConcludeTime,GETDATE())=0) as Score
+            ')
+            ->paginate(5)
+            ->toArray();
+        return $userList;
+    }
+    /**new  湖南项目
+     * 合伙人获取成员列表
+     * @access static
+     * @return string
+     */
+    static function getUserListForPartner_hunan($UserID,$ClubID){
+//        echo $UserID;
+//        exit;
+        $userList = clubuser::alias('cu')
+            ->where([
+            ['cu.ClubID','=',$ClubID],
+            ['DistributorId','=',$UserID],
+            ['Reviewed','>',0]
+        ])
+//            ->leftJoin('RYTreasureDBLink.RYTreasureDB.dbo.recordusergamebigend rugbe','rugbe.UserID = cu.UserID')
+            ->field('
+            cu.UserID,
+            cu.GameID,
+            cu.NickName,
+            MatchScore+Coffer as MatchScore,
+            cu.Reviewed,
+            cu.UserRight,
+            (select sum(TeaChange) from RYRecordDBLink.RYRecordDB.dbo.recrodteainfo where RelationID = cu.UserID and ClubID = cu.ClubID and DATEDIFF(DAY,RecordDate,GETDATE())=1) as ContributionValue,
+            (select count(*) from RYTreasureDBLink.RYTreasureDB.dbo.recordusergamebigend where UserID = cu.UserID and LockClubID = cu.ClubID and DATEDIFF(DAY,ConcludeTime,GETDATE())=1) as count,
+            (select sum(WinScore) from RYTreasureDBLink.RYTreasureDB.dbo.recordusergamebigend where UserID = cu.UserID and LockClubID = cu.ClubID and DATEDIFF(DAY,ConcludeTime,GETDATE())=1) as YesterdayScore,
+            (select sum(WinScore) from RYTreasureDBLink.RYTreasureDB.dbo.recordusergamebigend where UserID = cu.UserID and LockClubID = cu.ClubID and DATEDIFF(DAY,ConcludeTime,GETDATE())=0) as Score
+            ')
+            ->paginate(5)
+            ->toArray();
+        return $userList;
+    }
+    /** 湖南项目
+     * 使用userID查询用户信息
+     * */
+    static function getUserClubInfoByUserID_hunan($UserID,$ClubID){
+        $user_info_for_user_id = clubuser::alias('cu')
+            ->where([
+            ['cu.UserID','=',$UserID],
+            ['cu.ClubID','=',$ClubID]
+        ])
+//            ->leftJoin('RYTreasureDBLink.RYTreasureDB.dbo.recordusergamebigend rugbe','rugbe.UserID = cu.UserID')
+            ->field('
+            cu.UserID,
+            cu.GameID,
+            cu.NickName,
+            MatchScore+Coffer as MatchScore,
+            cu.Reviewed,
+            cu.UserRight,
+            (select sum(TeaChange) from RYRecordDBLink.RYRecordDB.dbo.recrodteainfo where RelationID = cu.UserID and ClubID = cu.ClubID and DATEDIFF(DAY,RecordDate,GETDATE())=1) as ContributionValue,
+            (select count(*) from RYTreasureDBLink.RYTreasureDB.dbo.recordusergamebigend where UserID = cu.UserID and LockClubID = cu.ClubID and DATEDIFF(DAY,ConcludeTime,GETDATE())=1) as count,
+            (select sum(WinScore) from RYTreasureDBLink.RYTreasureDB.dbo.recordusergamebigend where UserID = cu.UserID and LockClubID = cu.ClubID and DATEDIFF(DAY,ConcludeTime,GETDATE())=1) as YesterdayScore,
+            (select sum(WinScore) from RYTreasureDBLink.RYTreasureDB.dbo.recordusergamebigend where UserID = cu.UserID and LockClubID = cu.ClubID and DATEDIFF(DAY,ConcludeTime,GETDATE())=0) as Score
+            ')
+            ->findOrEmpty()
+            ->toArray();
+//        p($user_info);
+//        exit;
+        return $user_info_for_user_id;
+    }
     /**new
      * 合伙人搜索成员
      * @access static
@@ -162,6 +249,32 @@ class clubuser extends Model
 //        p($user_info);
 //        exit;
         return $user_info_for_user_id;
+    }
+    /**  湖南项目
+     * 点击合伙人获取到的数据
+     * $where         条件
+     * @access static
+     * @return string
+     */
+    static function getAgentList_hunan($UserID,$ClubID){
+
+        $sql='
+          SELECT 
+          tc.GameID,
+          tc.UserID,
+          tc.NickName,
+          Revenue=tc.TotalRevenue,
+          tc.CooperatePercent,
+          GrossScore=(SELECT sum(cuu.MatchScore)+sum(cuu.Coffer) from ClubUser cuu LEFT JOIN ClubUser cu on cu.DistributorId = tc.UserID where cuu.UserID = cu.UserID and cuu.ClubID = cu.ClubID),
+          -- PlayCount=(SELECT count(*) from RYTreasureDBLink.RYTreasureDB.dbo.RecordUserGameBigEnd rugbe LEFT JOIN ClubUser cu on cu.DistributorId = tc.UserID where rugbe.UserID = cu.UserID and rugbe.LockClubID = cu.ClubID and DATEDIFF(DAY,ConcludeTime,GETDATE())=1),
+          -- WinAndLose=(SELECT sum(WinScore) from RYTreasureDBLink.RYTreasureDB.dbo.RecordUserGameBigEnd rugbe LEFT JOIN ClubUser cu on cu.DistributorId = tc.UserID where rugbe.UserID = cu.UserID and rugbe.LockClubID = cu.ClubID and DATEDIFF(DAY,ConcludeTime,GETDATE())=0),
+          TodayCooperete=(SELECT ISNULL(SUM(rti.TeaChange),0) from RYRecordDBLink.RYRecordDB.dbo.RecrodTeaInfo rti where DATEDIFF(DAY,RecordDate,GETDATE())=0 AND rti.ClubID = tc.ClubID AND rti.UserID = tc.UserID),
+          YesterdayCooperete=(SELECT ISNULL(SUM(rti.TeaChange),0) from RYRecordDBLink.RYRecordDB.dbo.RecrodTeaInfo rti where DATEDIFF(DAY,RecordDate,GETDATE())=1 AND rti.ClubID = tc.ClubID AND rti.UserID = tc.UserID)
+          FROM dbo.ClubUser tc 
+          WHERE (tc.ClubID=? AND tc.DistributorId = ? AND UserRight=1) OR (tc.ClubID =? AND tc.UserID = ?)
+          ';
+        $agentList=clubuser::query($sql,[$ClubID,$UserID,$ClubID,$UserID]);
+        return $agentList;
     }
     /**
      * 点击合伙人获取到的数据

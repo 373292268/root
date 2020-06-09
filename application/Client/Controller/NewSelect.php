@@ -145,6 +145,65 @@ class NewSelect extends Controller
             exitJson(204,'数据为空');
         }
     }
+    /**
+     * 获取成员列表页面信息
+     * 成员
+     *
+     * $UserID      用户id
+     * $ClubID      俱乐部id
+     * @return $status int  状态码
+     * @return $msg string  错误信息
+     * @return $data array  返回数据
+     */
+
+    public function user_hunan(){
+//        $AgentUserID = input('post.AgentUserID/d');//添加者的GameID
+        $UserID = input('post.UserID/d');//执行者的user_id
+        $ClubID = input('post.ClubID/d');//俱乐部id
+        $sign = input('post.sign/s');//签名
+//        writeLog(input('post.'),'sign.log','input');
+
+
+        if($_SESSION['level']!='partner'&&$_SESSION['level']!='boss'&&$_SESSION['level']!='manager'){
+            exitJson(401,'无权限');
+        }
+        //        校验参数
+        if(empty($UserID)||empty($ClubID)||empty($sign)){
+//            echo 123;
+            exitJson(400,'参数错误');
+        }
+//        //        签名
+//        $status=getSignForApi(input('post.'));
+//        if($status==false){
+//            exitJson(403,'签名错误');
+//        }
+//        $key=config('key');
+//        $data=[
+//            'UserID'=>$UserID,
+//            'ClubID'=>$ClubID,
+//            'key'=>$key,
+//        ];
+//        exitJson(403,'签名错误');
+//        if($sign!=Sign($data)){
+//            exitJson(403,'签名错误');
+//        }
+//        如果点击的人是馆主或者管理员，就查出所有人
+        if($_SESSION['level']=='boss'||$_SESSION['level']=='manager'){
+
+            $userList=clubuser::getUserListForBoss_hunan($UserID,$ClubID);
+        }elseif($_SESSION['level']=='partner'){
+
+            $userList=clubuser::getUserListForPartner_hunan($UserID,$ClubID);
+        }
+        $selfInfo=clubuser::getUserClubInfoByUserID_hunan($UserID,$ClubID);
+//        writeLog($userList,'test.log');
+        $userList['data'][]=$selfInfo;
+        if($userList){
+            exitJson(200,'成功',$userList);
+        }else{
+            exitJson(204,'数据为空');
+        }
+    }
 
     /**
      * 获取成员列表查询单个人信息
@@ -248,7 +307,7 @@ class NewSelect extends Controller
             exitJson(200,'成功',$userInfo);
         }else{
             exitJson(204,'数据为空');//test
-        }
+        } 
     }
     /**
      * 获取个人数据中的游戏变动数据
@@ -489,6 +548,67 @@ class NewSelect extends Controller
         }elseif ($_SESSION['level']=='partner'){
             //            请求自己和请求下级执行的接口一样
             $agentList=clubuser::getAgentList($UserID,$ClubID);
+        }
+
+        if($agentList){
+            exitJson(200,'获取成功',$agentList);
+        }else{
+            exitJson(201,'无数据');
+        }
+    }
+
+    /**
+     * 合伙人
+     * 合伙人主页面
+     * $UserID      用户id
+     * $ClubID      俱乐部id
+     * @return $status int  状态码
+     * @return $msg string  错误信息
+     * @return $data array  返回数据
+     */
+    public function agent_hunan(){
+        $AgentUserID = input('post.AgentUserID/d');//点击者的GameID
+        $UserID = input('post.UserID/d');//执行者的user_id
+        $ClubID = input('post.ClubID/d');//俱乐部id
+        $sign = input('post.sign/s');//签名
+//        p(input('post.'));
+        if(empty($UserID)||empty($ClubID)||empty($sign)||empty($AgentUserID)){
+//            echo 123;
+            exitJson(400,'参数错误');
+        }
+//        p($_SESSION);
+//        exit;
+//        校验权限
+        if($_SESSION['level']!='boss'&&$_SESSION['level']!='manager'&&$_SESSION['level']!='partner'){
+            exitJson(401,'无权限');
+        }
+        if(empty($_SESSION['level'])){
+            exitJson(400,'身份不明');
+        }
+//        签名
+//        $status=getSignForApi(input('post.'));
+//        if($status==false){
+//            exitJson(403,'签名错误');
+//        }
+//        exitJson(403,'签名错误');
+//        if($sign!=Sign($data)){
+//            exitJson(403,'签名错误');
+//        }
+////        如果该请求是楼主或者管理员发起的  则分请求自己或请求别人两种情况
+        if($_SESSION['level']=='boss'||$_SESSION['level']=='manager'){
+//            请求自己、
+            if($UserID==$AgentUserID){
+                $agentList=clubuser::getAgentList_hunan($UserID,$ClubID);
+            }
+//            请求下级代理
+            if($UserID!=$AgentUserID){
+                $agentList=clubuser::getAgentList_hunan($AgentUserID,$ClubID);
+
+            }
+//            如果该请求是合伙人发起的，则只有一种情况
+        }elseif ($_SESSION['level']=='partner'){
+            //            请求自己和请求下级执行的接口一样
+            $agentList=clubuser::getAgentList_hunan($UserID,$ClubID);
         }
 
         if($agentList){

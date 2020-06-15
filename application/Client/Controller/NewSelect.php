@@ -173,7 +173,7 @@ class NewSelect extends Controller
             exitJson(400,'参数错误');
         }
 //        //        签名
-//        $status=getSignForApi(input('post.'));
+        $status=getSignForApi(input('post.'));
 //        if($status==false){
 //            exitJson(403,'签名错误');
 //        }

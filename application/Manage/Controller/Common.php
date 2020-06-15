@@ -13,6 +13,7 @@ use app\Manage\Model\auth_rule;
 class Common extends Controller
 {
     public function initialize(){
+
         session('menu',null);
         $menu=auth_rule::where(['pid'=>0,'status'=>1])->select()->toArray();
         foreach ($menu as $key=>$val)

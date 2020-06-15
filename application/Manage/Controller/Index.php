@@ -20,6 +20,9 @@ class Index extends Common
     {
         parent::initialize();
         $this->login_status=session('login_status');
+        if(session('login_flag')!=config('config.salt')){
+            abort(404,'页面不存在');
+        }
 
         if($this->login_status==false){
             exit('身份丢失');

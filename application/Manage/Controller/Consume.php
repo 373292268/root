@@ -97,7 +97,7 @@ class Consume extends Common
         }else{
             $status=0;
         }
-        $noticeInfo=web::table('news')->where(['NewsID'=>$NewsID])->field('NewsID,Subject,OnTop,Body')->update(['Subject'=>$title,'OnTop'=>$status,'Body'=>$body]);
+        $noticeInfo=web::table('news')->where(['NewsID'=>$NewsID])->field('NewsID,Subject,OnTop,Body')->cache('getScollNotice',0)->update(['Subject'=>$title,'OnTop'=>$status,'Body'=>$body]);
         if($noticeInfo==1){
             $this->success('成功');
         }else{
@@ -197,6 +197,9 @@ class Consume extends Common
         return $this->fetch('indexMessage');
     }
 
+    public function ClearBreakLine(){
+        return $this->fetch('ClearBreakLine');
+    }
     /**
      * 修改消息
      * 消息
@@ -434,6 +437,84 @@ class Consume extends Common
         }
     }
     /**
+     * 获取用户游戏状态
+     * ajax
+     *
+     * $GameID      用户游戏id
+     *
+     * @return $status int  状态码
+     * @return $msg string  错误信息
+     * @return $data array  返回数据
+     */
+    public function search_info_game(){
+        $GameID=input('GameID/d');
+        if(empty($GameID)){
+            return json(['code'=>404,'msg'=>'参数为空']);
+        }
+//        Db::startTrans();
+        $userInfo=acc_acinfo::conn_accounts()
+            ->table('accountsinfo')
+            ->alias('ai')
+            ->leftJoin('RYTreasureDBLink.RYTreasureDB.dbo.GameScoreLocker gsl','gsl.UserID=ai.UserID')
+            ->where(['ai.GameID'=>$GameID])
+            ->field('ai.UserID,ai.NickName,gsl.KindID')
+            ->findOrEmpty();
+
+//        writeLog($userInfo,'search_info.log');
+//        exit;
+        if($userInfo){
+//            Db::commit();//执行
+            return json(['code'=>200,'msg'=>'获取成功','data'=>$userInfo]);
+        }else{
+//            Db::rollback();//回滚
+            return json(['code'=>400,'msg'=>'用户不存在']);
+        }
+    }
+
+    /**
+     * 清除卡线
+     * ajax
+     *
+     * $UserID      用户id
+     *
+     * @return $status int  状态码
+     * @return $msg string  错误信息
+     * @return $data array  返回数据
+     */
+    public function ClearBreakLineClear(){
+        $UserID=input('UserID/d');
+//        writeLog(input());
+        if(empty($UserID)){
+            return json(['code'=>404,'msg'=>'参数为空']);
+        }
+        $userInfo=acc_acinfo::conn_accounts()
+            ->table('accountsinfo')
+            ->alias('ai')
+            ->leftJoin('RYTreasureDBLink.RYTreasureDB.dbo.GameScoreLocker gsl','gsl.UserID=ai.UserID')
+            ->where(['ai.UserID'=>$UserID])
+            ->field('ai.UserID,ai.NickName,gsl.KindID')
+            ->findOrEmpty();
+
+        Db::startTrans();
+        if(empty($userInfo['KindID'])){
+            return json(['code'=>400,'msg'=>'用户不在游戏中']);
+        }
+        $result=acc_acinfo::conn_accounts('rytreasuredb')
+            ->table('gamescorelocker')
+            ->where([
+                ['UserID','=',$UserID]
+            ])
+            ->delete();
+        writeLog($result);
+        if($result){
+            Db::commit();//执行
+            return json(['code'=>200,'msg'=>'清除成功']);
+        }else{
+            Db::rollback();//回滚
+            return json(['code'=>400,'msg'=>'清除失败']);
+        }
+    }
+    /**
      * 获取茶楼信息
      * ajax
      *
@@ -466,15 +547,15 @@ class Consume extends Common
         }
     }
     /**
-     * 充值钻石
-     * ajax
-     *
-     * $UserID      用户id
-     *
-     * @return $status int  状态码
-     * @return $msg string  错误信息
-     * @return $data array  返回数据
-     */
+ * 充值钻石
+ * ajax
+ *
+ * $UserID      用户id
+ *
+ * @return $status int  状态码
+ * @return $msg string  错误信息
+ * @return $data array  返回数据
+ */
     public function RechargeDiamondPay(){
         $UserID=input('UserID/d');
         $Number=input('Number/d');
@@ -528,6 +609,8 @@ class Consume extends Common
             return json(['code'=>400,'msg'=>'充值失败']);
         }
     }
+
+
 
     /**
      * 设置积分上限

@@ -13,9 +13,16 @@ use think\Controller;
 class Login extends Controller
 {
     public function login_index(){
+        $salt=input('get.flag');
+        $adminSalt=config('config.salt');
+        if($salt!=$adminSalt){
+            abort(404,'页面不存在');
+        }
+        session('login_flag',$salt,'think');
         return $this->fetch();
     }
     public function login_do(){
+
         $userName=input('post.username');
         $password=input('post.password');
 

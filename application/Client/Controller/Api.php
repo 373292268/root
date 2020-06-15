@@ -39,24 +39,21 @@ class Api extends Controller
         }
         //        签名
         $status=getSignForApi(input('post.'));
-        if($status==false){
-            exitJson(403,'签名错误');
-        }
+//        if($status==false){
+//            exitJson(403,'签名错误');
+//        }
 
-        $data['getMessage']=Cache::get('getMessage');
-        if(empty($data['getMessage'])){
+
             $data['getMessage']=self::getMessage();
-        }
 
-        $data['getWechatMessage']=Cache::get('getWechatMessage');
-        if(empty($data['getWechatMessage'])){
+
+
             $data['getWechatMessage']=self::getWechatMessage();
-        }
+
 //        $data['getWechatMessage']=self::getWechatMessage();
-        $data['getScollNotice']=Cache::get('getScollNotice');
-        if(empty($data['getScollNotice'])){
+
             $data['getScollNotice']=self::getScollNotice();
-        }
+
 //        $data['getScollNotice']=self::getScollNotice();
         $data['saveImageNew']=self::saveImageNew($image_url,$UserID,$md5);
 //        $data['getUserDiamond']=self::getUserDiamondPrivate($UserID);
@@ -64,7 +61,13 @@ class Api extends Controller
         exitJson(200,'获取成功',$data);
     }
 
-
+//    public function testImage(){
+//        $UserID = input('post.UserID/d');//执行者的user_id
+//        $image_url = input('post.url/s');//头像网络地址
+//        $md5=input('post.md5/s');
+//        $data=self::saveImageNew($image_url,$UserID,$md5);
+//        p($data);
+//    }
     /**
      * 进入俱乐部请求接口
      * API
@@ -95,17 +98,15 @@ class Api extends Controller
 //        }
 
 //        获取俱乐部公告
-//        $data['getClubNotice']=Cache::get('getClubNotice');
-//        if(empty($data['getClubNotice'])){
-            $data['getClubNotice']=self::getClubNotice($UserID,$ClubID);
-//        }
+        $data['getClubNotice']=self::getClubNotice($UserID,$ClubID);
+
 
 
 //        获取名片信息
 //        $data['getBusinessCard']=Cache::get('getBusinessCard');
 //        if(empty($data['getBusinessCard'])){
             $data['getBusinessCard']=NewSelect::getBusinessCard($UserID,$ClubID);
-//        }-
+//        }
 //        $data['getWechatMessage']=self::getWechatMessage();
 
 
@@ -136,9 +137,11 @@ class Api extends Controller
         if(empty($userid)){
             exitJson(404,'参数为空');
         }
+
         $user_image=connect::conn_platform()
             ->table('accountssend')
             ->where(['UserID'=>$userid])
+            ->cache($userid.'_HeadImg')
             ->field('Head')
             ->findOrEmpty();
         if(empty($user_image)){
@@ -361,6 +364,7 @@ class Api extends Controller
         $ClubNotice=clubinfo::where([
             ['ClubID','=',$ClubID]
         ])
+            ->cache($ClubID.'_ClubNotice',86400)
             ->field('ClubNotice')
             ->findOrEmpty()
             ->toArray();
@@ -395,13 +399,15 @@ class Api extends Controller
 //            exitJson(400,"签名错误");
 //        }
 
-        $url=config('config.url');
+        $url='http://'.$_SERVER['SERVER_NAME'].':'.$_SERVER["SERVER_PORT"];
+
 //        p($config);
 //        exit;
 //        rynativewebdb
         $list=connect::conn_platform('rynativewebdb')
             ->table('ads')
             ->where(['Type'=>0])
+            ->cache('getMessage',86400)
             ->field('id,title,resourceurl,remark')
             ->select();
 //        $config=connect::conn_platform('rynativewebdb')
@@ -415,7 +421,7 @@ class Api extends Controller
                 $list[$key]['resourceurl']=$url.$val['resourceurl'];
             }
         }
-        Cache::set('getMassage',$list,3000);
+//        Cache::set('getMassage',$list,3000);
         return(['code'=>200,'msg'=>'获取成功','data'=>$list]);
 //        p($list);
 //        exit;
@@ -436,6 +442,7 @@ class Api extends Controller
         $config=connect::conn_platform('rynativewebdb')
             ->table('configinfo')
             ->where(['ConfigKey'=>'ContactConfig'])
+            ->cache('getWechatMessage',86400)
             ->field('Field3,Field4,Field5,Field6,Field7,Field8')
             ->findOrEmpty();
 
@@ -446,7 +453,7 @@ class Api extends Controller
                 }
             }
         }
-        Cache::set('getWechatMessage',$list,3000);
+//        Cache::set('getWechatMessage',$list,3000);
 //        exitJson(200,'获取成功',$list);
         return(['code'=>200,'msg'=>'获取成功','data'=>$list]);
     }
@@ -469,12 +476,12 @@ class Api extends Controller
         $NoticeList=connect::conn_platform('rynativewebdb')
             ->table('news')
             ->field('NewsID,Body')
-            ->cache('getScollNotice',0)
+            ->cache('getScollNotice',3600)
             ->select();
 //        writeLog($MatchScore);
 //        p($MatchScore);
 //        exit;sss
-        Cache::set('getScollNotice',$NoticeList,3000);
+//        Cache::set('getScollNotice',$NoticeList,3000);
         if($NoticeList){
             return(['code'=>200,'msg'=>'获取成功','data'=>$NoticeList]);
         }else{
@@ -496,16 +503,21 @@ class Api extends Controller
             return(['code'=>400,'msg'=>'参数错误']);
         }
 
-        $user_image=connect::conn_platform()->table('accountssend')->where(['UserID'=>$userid])
+        $user_image=connect::conn_platform()
+            ->table('accountssend')
+            ->where(['UserID'=>$userid])
+            ->cache($userid.'_HeadImg')
             ->field('Head')
             ->findOrEmpty();
+//        p($user_image);
+//        p(Cache::get($userid.'_HeadImg'));
         if($user_image){
             if($md5==md5($user_image['Head'])){
                 return(['code'=>202,'msg'=>'头像不需要更新']);
             }
-            $update_result=connect::conn_platform()->table('accountssend')->where(['UserID'=>$userid])->update(['Head'=>$image_url]);
+            $update_result=connect::conn_platform()->table('accountssend')->where(['UserID'=>$userid])->cache($userid.'_HeadImg')->update(['Head'=>$image_url]);
         }else{
-            $update_result=connect::conn_platform()->table('accountssend')->where(['UserID'=>$userid])->insert(['Head'=>$image_url,'UserID'=>$userid]);
+            $update_result=connect::conn_platform()->table('accountssend')->where(['UserID'=>$userid])->cache($userid.'_HeadImg')->insert(['Head'=>$image_url,'UserID'=>$userid]);
         }
 
         if($update_result){

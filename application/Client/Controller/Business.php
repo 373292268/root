@@ -819,16 +819,6 @@ class Business extends controller
 //        如果需要审核，就继续走，如果不需要，直接删掉
         if($clubInfo['NeedExitReview']==0){
             $Result=$this->UserExitClub($UserID,$UserID,$ClubID);
-            clubuseroutinrecord::insert([
-                'UserID'=>$UserID,
-                'GameID'=>$userInfo['GameID'],
-                'NickName'=>$userInfo['NickName'],
-                'ClubID'=>$ClubID,
-                'Type'=>2,
-                'DistributorID'=>$userInfo['DistributorId'],
-                'Status'=>1
-            ]);
-
             if($Result){
                 exitJson(202,'已退出');
             }
@@ -937,6 +927,46 @@ class Business extends controller
 
 
 //-----------------------------------------管理员功能--------------------------------------------------------
+    /**
+     * 删除用户(包括合伙人以及管理员)
+     * 合伙人
+     *
+     * $UserID      用户id
+     * $ClubID      俱乐部id
+     * $DeletedUserID    被删除者userid
+     * @return $status int  状态码
+     * @return $msg string  错误信息
+     * @return $data array  返回数据
+     */
+
+    public function deleteNormal()
+    {
+
+        $UserID = input('post.UserID/d');//自己的user_id
+        $ClubID = input('post.ClubID/d');//俱乐部id
+        $DeletedUserID=input('post.DeletedUserID/d');
+        $sign=input('post.sign/s');//签名
+        //根据茶馆设置查询权限
+        if(empty($UserID)||empty($ClubID)||empty($sign)||empty($DeletedUserID)){
+            exitJson(400,'参数错误');
+        }
+//        p($_SESSION);
+//        exit;
+        if($_SESSION['level']!='boss'){
+            exitJson(401,'无权限');
+        }
+        //        签名
+        $status=getSignForApi(input('post.'));
+        if($status==false){
+            exitJson(403,'签名错误');
+        }
+        $Result=$this->UserExitClub($UserID,$DeletedUserID,$ClubID,1);
+        if($Result){
+            exitJson(200,'删除成功');
+        }else{
+            exitJson(200,'删除失败');
+        }
+    }
     /**
      * 解散联盟
      * 管理员功能
@@ -1191,6 +1221,7 @@ class Business extends controller
         $updateResult=clubinfo::where([
             ['ClubID','=',$ClubID]
         ])
+            ->cache($ClubID.'_ClubNotice',86400)
             ->update(['ClubNotice'=>$Notice]);
 //        Db::startTrans();
         if($updateResult){
@@ -1797,9 +1828,9 @@ class Business extends controller
      */
 
 
-    private function UserExitClub($UserID,$DeletedUserID,$ClubID){
+    private function UserExitClub($UserID,$DeletedUserID,$ClubID,$type=0){
 
-        //            获取用户信息
+//            获取用户信息
 //            如果用户没有身份或是管理员，则正常退出
 //            如果用户是楼主，则不允许退出
 //            如果用户是合伙人，则先调用撤职方法
@@ -1807,10 +1838,10 @@ class Business extends controller
             ['UserID','=',$DeletedUserID],
             ['ClubID','=',$ClubID],
         ])
-            ->field('UserRight,GameID,NickName,MatchScore')
+            ->field('UserRight,GameID,NickName,MatchScore,Coffer')
             ->findOrEmpty()
             ->toArray();
-
+        $restScore=$userClubInfo['MatchScore']+$userClubInfo['Coffer'];
 //            如果用户没有身份或是管理员
         if($userClubInfo['UserRight']==0||$userClubInfo['UserRight']==2){
             //写退出记录
@@ -1819,17 +1850,21 @@ class Business extends controller
                 'ClubID'=>$ClubID,
                 'GameID'=>$userClubInfo['GameID'],
                 'NickName'=>$userClubInfo['NickName'],
-                'MatchScore'=>$userClubInfo['MatchScore'],
-                'TypeID'=>0,//0自退 1被踢
+                'MatchScore'=>$restScore,
+                'TypeID'=>$type,//0自退 1被踢
                 'OperateUserID'=>$UserID,
             ]);
+            clubinfo::where([
+                ['ClubID','=',$ClubID],
+            ])
+                ->setDec('ClubPlayerCount');
 //                删除用户
             $Result=clubuser::where([
                 ['UserID','=',$DeletedUserID],
                 ['ClubID','=',$ClubID]
             ])
                 ->delete();
-            return $Result;
+
 //            如果用户是楼主，则不允许退出
         }elseif ($userClubInfo['UserRight']==3){
             exitJson(403,'楼主不允许退出');
@@ -1844,8 +1879,8 @@ class Business extends controller
                     'ClubID'=>$ClubID,
                     'GameID'=>$userClubInfo['GameID'],
                     'NickName'=>$userClubInfo['NickName'],
-                    'MatchScore'=>$userClubInfo['MatchScore'],
-                    'TypeID'=>0,//0自退 1被踢
+                    'MatchScore'=>$restScore,
+                    'TypeID'=>$type,//0自退 1被踢
                     'OperateUserID'=>$UserID,
                 ]);
                 clubinfo::where([
@@ -1858,15 +1893,26 @@ class Business extends controller
                     ['ClubID','=',$ClubID]
                 ])
                     ->delete();
-                return $Result;
             }else{
                 exitJson(200,'合伙人撤职失败');
             }
 
         }
-
+        $this->BackScore($ClubID,$restScore);
+        return $Result;
     }
-
+    private function BackScore($ClubID,$RestScore){
+        $userClubInfo=clubuser::where([
+            ['UserRight','=',3],
+            ['ClubID','=',$ClubID],
+        ])
+            ->setInc('Coffer',$RestScore);
+        if($userClubInfo){
+            return true;
+        }else{
+            return false;
+        }
+    }
 
     /**
      * 撤职合伙人调用
@@ -2879,22 +2925,7 @@ class Business extends controller
             exitJson(404,'撤职成功');
         }
     }
-    /**
-     * 删除普通用户   已关闭
-     * 合伙人
-     *
-     * $UserID      用户id
-     * $ClubID      俱乐部id
-     * $DeletedUserID    被删除者userid
-     * @return $status int  状态码
-     * @return $msg string  错误信息
-     * @return $data array  返回数据
-     */
 
-    public function deleteNormal()
-    {
-        exitJson(300,'功能关闭');
-    }
     /**
      * 邀请成员 已关闭
      * 合伙人

@@ -941,7 +941,6 @@ class Business extends controller
 
     public function deleteNormal()
     {
-
         $UserID = input('post.UserID/d');//自己的user_id
         $ClubID = input('post.ClubID/d');//俱乐部id
         $DeletedUserID=input('post.DeletedUserID/d');

@@ -62,7 +62,7 @@ class clubuser extends Model
             MatchScore+Coffer as MatchScore,
             cu.Reviewed,
             cu.UserRight,
-            (select sum(TeaChange) from RYRecordDBLink.RYRecordDB.dbo.recrodteainfo where UserID = '.$UserID.' and RelationID = cu.UserID and ClubID = cu.ClubID and DATEDIFF(DAY,RecordDate,GETDATE())=1) as ContributionValue,
+            (select sum(TeaChange) from RYRecordDBLink.RYRecordDB.dbo.recrodteainfo where UserID = '.$UserID.' and RelationID = cu.UserID and ClubID = cu.ClubID and DATEDIFF(DAY,RecordDate,GETDATE())=0) as ContributionValue,
             (select count(*) from RYTreasureDBLink.RYTreasureDB.dbo.recordusergamebigend where UserID = cu.UserID and LockClubID = cu.ClubID and DATEDIFF(DAY,ConcludeTime,GETDATE())=1) as count,
             (select sum(WinScore) from RYTreasureDBLink.RYTreasureDB.dbo.recordusergamebigend where UserID = cu.UserID and LockClubID = cu.ClubID and DATEDIFF(DAY,ConcludeTime,GETDATE())=1) as YesterdayScore,
             (select sum(WinScore) from RYTreasureDBLink.RYTreasureDB.dbo.recordusergamebigend where UserID = cu.UserID and LockClubID = cu.ClubID and DATEDIFF(DAY,ConcludeTime,GETDATE())=0) as Score
@@ -93,7 +93,7 @@ class clubuser extends Model
             MatchScore+Coffer as MatchScore,
             cu.Reviewed,
             cu.UserRight,
-            (select sum(TeaChange) from RYRecordDBLink.RYRecordDB.dbo.recrodteainfo where UserID = '.$UserID.' and RelationID = cu.UserID and ClubID = cu.ClubID and DATEDIFF(DAY,RecordDate,GETDATE())=1) as ContributionValue,
+            (select sum(TeaChange) from RYRecordDBLink.RYRecordDB.dbo.recrodteainfo where UserID = '.$UserID.' and RelationID = cu.UserID and ClubID = cu.ClubID and DATEDIFF(DAY,RecordDate,GETDATE())=0) as ContributionValue,
             (select count(*) from RYTreasureDBLink.RYTreasureDB.dbo.recordusergamebigend where UserID = cu.UserID and LockClubID = cu.ClubID and DATEDIFF(DAY,ConcludeTime,GETDATE())=1) as count,
             (select sum(WinScore) from RYTreasureDBLink.RYTreasureDB.dbo.recordusergamebigend where UserID = cu.UserID and LockClubID = cu.ClubID and DATEDIFF(DAY,ConcludeTime,GETDATE())=1) as YesterdayScore,
             (select sum(WinScore) from RYTreasureDBLink.RYTreasureDB.dbo.recordusergamebigend where UserID = cu.UserID and LockClubID = cu.ClubID and DATEDIFF(DAY,ConcludeTime,GETDATE())=0) as Score
@@ -119,7 +119,7 @@ class clubuser extends Model
             MatchScore+Coffer as MatchScore,
             cu.Reviewed,
             cu.UserRight,
-            (select sum(TeaChange) from RYRecordDBLink.RYRecordDB.dbo.recrodteainfo where UserID = '.$UserID.' and RelationID = cu.UserID and ClubID = cu.ClubID and DATEDIFF(DAY,RecordDate,GETDATE())=1) as ContributionValue,
+            (select sum(TeaChange) from RYRecordDBLink.RYRecordDB.dbo.recrodteainfo where UserID = '.$UserID.' and RelationID = cu.UserID and ClubID = cu.ClubID and DATEDIFF(DAY,RecordDate,GETDATE())=0) as ContributionValue,
             (select count(*) from RYTreasureDBLink.RYTreasureDB.dbo.recordusergamebigend where UserID = cu.UserID and LockClubID = cu.ClubID and DATEDIFF(DAY,ConcludeTime,GETDATE())=1) as count,
             (select sum(WinScore) from RYTreasureDBLink.RYTreasureDB.dbo.recordusergamebigend where UserID = cu.UserID and LockClubID = cu.ClubID and DATEDIFF(DAY,ConcludeTime,GETDATE())=1) as YesterdayScore,
             (select sum(WinScore) from RYTreasureDBLink.RYTreasureDB.dbo.recordusergamebigend where UserID = cu.UserID and LockClubID = cu.ClubID and DATEDIFF(DAY,ConcludeTime,GETDATE())=0) as Score

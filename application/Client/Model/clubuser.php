@@ -265,7 +265,7 @@ class clubuser extends Model
           tc.NickName,
           Revenue=tc.TotalRevenue,
           tc.CooperatePercent,
-          GrossScore=(SELECT sum(cuu.MatchScore)+sum(cuu.Coffer) from ClubUser cuu LEFT JOIN ClubUser cu on cu.DistributorId = tc.UserID and cu.ClubID = tc.ClubID where cuu.UserID = cu.UserID and cuu.ClubID = cu.ClubID),
+          
           -- PlayCount=(SELECT count(*) from RYTreasureDBLink.RYTreasureDB.dbo.RecordUserGameBigEnd rugbe LEFT JOIN ClubUser cu on cu.DistributorId = tc.UserID where rugbe.UserID = cu.UserID and rugbe.LockClubID = cu.ClubID and DATEDIFF(DAY,ConcludeTime,GETDATE())=1),
           -- WinAndLose=(SELECT sum(WinScore) from RYTreasureDBLink.RYTreasureDB.dbo.RecordUserGameBigEnd rugbe LEFT JOIN ClubUser cu on cu.DistributorId = tc.UserID where rugbe.UserID = cu.UserID and rugbe.LockClubID = cu.ClubID and DATEDIFF(DAY,ConcludeTime,GETDATE())=0),
           TodayCooperete=(SELECT ISNULL(SUM(rti.TeaChange),0) from RYRecordDBLink.RYRecordDB.dbo.RecrodTeaInfo rti where DATEDIFF(DAY,RecordDate,GETDATE())=0 AND rti.ClubID = tc.ClubID AND rti.UserID = tc.UserID),

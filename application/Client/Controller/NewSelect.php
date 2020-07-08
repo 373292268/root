@@ -24,6 +24,7 @@ class NewSelect extends Controller
      */
     protected function initialize()
     {
+
         $UserID = input('post.UserID/d');
         $ClubID = input('post.ClubID/d');
 //        echo $UserID;
@@ -310,6 +311,44 @@ class NewSelect extends Controller
         } 
     }
     /**
+     * 获取用户的基本数据
+     * 个人数据
+     *
+     * $UserID      用户id
+     *
+     * $ClubID      俱乐部id
+     * $SelectUserID      要查询的用户id
+     * @return $status int  状态码
+     * @return $msg string  错误信息
+     * @return $data array  返回数据
+     */
+    public function getUserBasicInfo(){
+        $UserID = input('post.UserID/d');
+        $ClubID = input('post.ClubID/d');
+        $SelectGameID=input('post.SelectGameID/d');
+        $sign = input('post.sign/s');
+//        writeLog(input());
+        if(empty($UserID)||empty($ClubID)||empty($sign)||empty($SelectGameID)){
+            exitJson(400,'参数错误');
+        }
+
+        $status=getSignForApi(input('post.'));
+        if($status==false){
+            exitJson(403,'签名错误');
+        }
+        $User=New User(null,$SelectGameID);
+        if($User->Status==false){
+            exitJson(204,'查无此人');
+        }
+        $User->getUserHeadImg();
+        $UserInfo['UserID']=$User->UserID;
+        $UserInfo['GameID']=$User->GameID;
+        $UserInfo['NickName']=$User->NickName;
+        $UserInfo['HeadImg']=$User->HeadImg;
+        exitJson(200,'成功',$UserInfo);
+    }
+
+    /**
      * 获取个人数据中的游戏变动数据
      * 个人数据
      *
@@ -490,6 +529,86 @@ class NewSelect extends Controller
 
     }
 
+
+    /**
+     * 获取用户的游戏数据
+     * 新增查询
+     * 2020年7月7日16:42:29
+     *
+     * $UserID      用户id
+     * $ClubID      俱乐部id
+     * $SelectUserID      要查询的用户id
+     * @return $status int  状态码
+     * @return $msg string  错误信息
+     * @return $data array  返回数据
+     */
+    public function ServerUserGameData(){
+        $UserID = input('post.UserID/d');
+        $ClubID = input('post.ClubID/d');
+        $SelectGameID=input('post.SelectGameID/d');
+        $sign = input('post.sign/s');
+        $Type = input('post.Type/d');//0,当天；1昨天；2前天
+//        writeLog(input());
+        if(empty($UserID)||empty($ClubID)||empty($sign)||empty($SelectGameID)||!isset($Type)){
+            exitJson(400,'参数错误');
+        }
+
+        $status=getSignForApi(input('post.'));
+//        if($status==false){
+//            exitJson(403,'签名错误');
+//        }
+//        验证搜索的用户是否是该用户下级用户
+        $User=New User(null,$SelectGameID);
+        if($User->Status==false){
+            exitJson(204,'查无此人');
+        }
+//        p($User->UserID);
+
+
+////////////////////////////////////////////////////////////////////////////////////////////
+/// ///////////////////////确认是否需要查询该用户///////////////////////////////////////////
+/// ////////////////////////////////////////////////////////////////////////////////////////
+//        如果被查询用户的UserID等于自己的UserID
+//        相当于是查询自己
+        if($User->UserID==$UserID){
+            if($Type!==0||$Type!==1||$Type!==2){
+                exitJson(400,'时间参数传输有误');
+            }
+        }else{
+            $array=clubuser::where([
+                ['ClubID','=',$ClubID]
+            ])
+                ->field('UserID,DistributorId')
+                ->select()
+                ->toArray();
+            $HaveBool=treeHave($array,$UserID,$User->UserID);
+//            exit;
+            if($HaveBool==false){
+                exitJson(500,'该用户不是你的下级');
+            }
+            if($Type!==0){
+                exitJson(400,'时间参数传输有误');
+            }
+        }
+////////////////////////////////////////////////////////////////////////////////////////////
+/// ///////////////////////确认是否需要查询该用户///////////////////////////////////////////
+/// ////////////////////////////////////////////////////////////////////////////////////////
+//        获取该用户头像
+        $User->getUserHeadImg();
+
+        $UserData=connect::conn_platform('rytreasuredb')
+            ->table('recordusergamebigend')
+            ->where([
+                ['UserID','=',$User->UserID],
+                ['LockClubID','=',$ClubID]
+            ])
+            ->where('DATEDIFF(DAY,ConcludeTime,GETDATE())='.$Type)
+            ->field('isnull(sum(BigWiner),0) as BigWinner,isnull(sum(WinScore),0) as WinScore,isnull(count(*),0) as Count')
+            ->find();
+
+
+        exitJson(200,'成功',$UserData);
+    }
 //-------------------------------------------成员------------------------------------------------------
 
 
@@ -1186,9 +1305,23 @@ class NewSelect extends Controller
             ->limit(60)
             ->order('logTime desc')
             ->select();
+
+        $spend = clubuser::where([
+            ['ClubID','=',$ClubID],
+            ['UserID','=',$UserID]
+        ])
+            ->field('
+                CooperatePercent,
+                (select isnull(sum(TeaScore),0) from RYRecordDBLink.RYRecordDB.dbo.recrodteainfo where DATEDIFF(DAY,RecordDate,GETDATE())=0) as todaySpend,
+                (select isnull(sum(TeaScore),0) from RYRecordDBLink.RYRecordDB.dbo.recrodteainfo where DATEDIFF(DAY,RecordDate,GETDATE())=1) as yesterdaySpend
+                ')
+            ->findOrEmpty()
+            ->toArray();
+        $data['PersonData']=$spend;
+        $data['CofferRecord']=$CofferRecord;
 //        writeLog($CofferRecord);
         if($CofferRecord){
-            exitJson(200,'获取成功',$CofferRecord);
+            exitJson(200,'获取成功',$data);
         }else{
             exitJson(500,'数据为空');
         }
@@ -2003,5 +2136,15 @@ class NewSelect extends Controller
             $data[$key]['today_spend']=$list[$key]['today_spend']-$list[$key]['today_dismiss_spend'];
         }
         return $data;
+    }
+    function test(){
+        $arr=clubuser::where([
+            ['ClubID','=',1003066]
+        ])
+            ->field('UserID,DistributorId,Coffer,MatchScore')
+            ->select();
+        p($arr);
+        exit;
+        subtree($arr);
     }
 }

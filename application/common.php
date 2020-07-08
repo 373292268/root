@@ -227,3 +227,55 @@ function getSignForApi(Array $data){
     }
     return $code;
 }
+
+
+
+// 无限极分类
+function subtree($arr, $id = 0,&$number=0)
+{
+
+//    $subs = array(); // 子孙数组
+    foreach ($arr as $v) {
+        if ($v['DistributorId'] == $id) {
+
+            $number += $v['Coffer']+$v['MatchScore'];
+//            $subs[] = $v;
+//            $subs = array_merge($subs, subtree($arr, $v['UserID']));
+
+
+            subtree($arr, $v['UserID'],$number);
+
+        }
+    }
+    return $number;
+}
+// 查看无限级是否存在某个值 （所有用户，父级id，被确认id）
+
+function treeHave($arr, $id ,$haveUserID)
+{
+//    p($arr);
+//    $subs = array(); // 子孙数组
+    foreach ($arr as $v) {
+
+        if ($v['DistributorId'] == $id) {
+//            p($v['UserID']);
+//            p($haveUserID);
+            if($v['UserID']==$haveUserID){
+                return true;
+
+            }else{
+                $status=treeHave($arr, $v['UserID'],$haveUserID);
+                if($status==true){
+                    break;
+                }
+            }
+
+        }
+    }
+    if(!isset($status)){
+        $status=false;
+    }
+//    var_dump($status);
+//    exit;
+    return $status;
+}

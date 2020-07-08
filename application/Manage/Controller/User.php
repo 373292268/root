@@ -101,15 +101,25 @@ class User extends Common
     public function ClubUser(){
         $type=input('type/s');
         $ClubID=input('ClubID/d');
+//        echo $type;
+//        exit;
+//        p($type);
+//        exit;
 //        查询
         if($type=='search'){
+//            echo $type;
+//            exit;
             $condition=input('condition/s');
-            $SearchList=club::teaHouseSearch($condition);
+
+            $SearchList=club::teaHouseUserSearch($condition,$ClubID);
             $page = $SearchList->render();
             $data=$SearchList->toArray();
+//            p($data);
+//            exit;
             $this->assign('list',$data['data']);
             $this->assign('page',$page);
-            return $this->fetch();
+            $this->assign('ClubID',$ClubID);
+            return $this->fetch('user');
         }
         $user_list=club::getClubUserListByClubID($ClubID);
         $page = $user_list->render();
@@ -120,6 +130,7 @@ class User extends Common
 //        exit;
         $this->assign('list',$data['data']);
         $this->assign('page',$page);
+        $this->assign('ClubID',$ClubID);
         return $this->fetch('user');
     }
 //    private function teaHouseSearch($condition){

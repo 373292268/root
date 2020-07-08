@@ -464,6 +464,97 @@ class Business extends controller
             exitJson(500,'调整失败');
         }
     }
+    /**
+     * 用户
+     * 用户转账
+     * $UserID      用户id
+     * $ClubID      俱乐部id
+     * $AdjustUserID      被调整用户userid
+     * $score       转账数值
+     * @return $status int  状态码
+     * @return $msg string  错误信息
+     * @return $data array  返回数据
+     * updateTime       2020年2月28日14:28:07
+     */
+    public function UserTransfer(){
+        $AdjustUserID = input('post.AdjustUserID/d');//被调整用户gameid
+        $UserID = input('post.UserID/d');//执行者的user_id
+        $ClubID = input('post.ClubID/d');//俱乐部id
+        $sign = input('post.sign/s');//签名
+        $score = input('post.Score/d');//调整数值
+
+
+        if(empty($_SESSION['level'])){
+            exitJson(400,'身份不明');
+        }
+        //        参数过滤
+        if(empty($AdjustUserID)||empty($UserID)||empty($ClubID)||empty($sign)||empty($score)){
+            exitJson(400,'参数错误');
+        }
+
+        if($AdjustUserID==$UserID){
+            exitJson(400,'不允许给自己转账');
+        }
+//        只允许转账正数
+        if((int)$score<=0){
+            exitJson(400,'转账数额有误');
+        }
+
+
+//        获取缓存中的身份信息
+        $code_cache=Cache::pull($UserID.$ClubID);
+        $sign_value=input('post.');
+        $sign_value['Code']=$code_cache;
+//        查看缓存中是否有code信息
+        if($code_cache===null){
+            exitJson(400,'Code丢失');
+        }
+
+
+        //        签名
+        $status=getSignForApi($sign_value);
+        if($status==false){
+            exitJson(403,'签名错误');
+        }
+//        实例化转账人对象
+        $givers=New User($UserID);
+//        获取用户俱乐部积分
+        $givers->getUserClubScore($ClubID);
+//        检查转账人剩余积分是否足够转账
+        if($givers->Coffer<$score){
+            exitJson(500,'保险箱积分不足');
+        }
+        $giversChange=0-$score;
+
+//        实例化被转账人对象
+        $receiver=New User($AdjustUserID);
+
+//        获取被转账用户俱乐部积分
+        $receiver->getUserClubScore($ClubID);
+
+
+        Db::startTrans();
+//        更新转账人的积分
+        $giversResult=$givers->changUserClubCoffer($giversChange);
+//        更新被转账人的积分
+        $receiverResult=$receiver->changUserClubCoffer($score);
+//        写转账人转账记录
+        $givers->insertUserScoreRecord($giversChange,$UserID,6);
+//        写被转账人收款记录
+        $receiver->insertUserScoreRecord($score,$UserID,6);
+
+        if($giversResult&&$receiverResult){
+            Db::commit();
+            $givers->getUserClubScore($ClubID);
+            exitJson(200,'转账成功',$givers->Coffer);
+        }else{
+            Db::rollback();
+            exitJson(500,'转账成功');
+        }
+
+
+
+    }
 
 
 //-----------------------------------------成员页面--------------------------------------------------------
@@ -819,6 +910,16 @@ class Business extends controller
 //        如果需要审核，就继续走，如果不需要，直接删掉
         if($clubInfo['NeedExitReview']==0){
             $Result=$this->UserExitClub($UserID,$UserID,$ClubID);
+            clubuseroutinrecord::insert([
+                'UserID'=>$UserID,
+                'GameID'=>$userInfo['GameID'],
+                'NickName'=>$userInfo['NickName'],
+                'ClubID'=>$ClubID,
+                'Type'=>2,
+                'DistributorID'=>$userInfo['DistributorId'],
+                'Status'=>1
+            ]);
+
             if($Result){
                 exitJson(202,'已退出');
             }
@@ -948,6 +1049,9 @@ class Business extends controller
         //根据茶馆设置查询权限
         if(empty($UserID)||empty($ClubID)||empty($sign)||empty($DeletedUserID)){
             exitJson(400,'参数错误');
+        }
+        if($UserID==$DeletedUserID){
+            exitJson(404,'不允许删除自己');
         }
 //        p($_SESSION);
 //        exit;
@@ -1806,6 +1910,74 @@ class Business extends controller
 
     }
 
+    /**
+     * 管理员功能
+     * 收回个人积分
+     * $UserID      用户id
+     * $ClubID      俱乐部id
+     * $ClearUserID      要清除用户的UserID
+     * @return $status int  状态码
+     * @return $msg string  错误信息
+     * @return $data array  返回数据
+     * updateTime  2020年2月28日15:41:36
+     */
+
+    public function clearUserScore(){
+        $ClearUserID = input('ClearUserID/d');//被调整用户userID
+        $UserID = input('UserID/d');//执行者的user_id
+        $ClubID = input('ClubID/d');//俱乐部id
+        $sign = input('sign/s');//签名
+        //根据茶馆设置查询权限
+        if(empty($ClearUserID)||empty($UserID)||empty($ClubID)||empty($sign)){
+            exitJson(400,'参数错误');
+        }
+        if($_SESSION['level']!='boss'&&$_SESSION['level']!='manager'){
+            exitJson(401,'无权限');
+        }
+
+//        签名
+        $status=getSignForApi(input('post.'));
+        if($status==false){
+            exitJson(403,'签名错误');
+        }
+
+        //获取用户个人信息
+        $userInfo=clubuser::alias('cu')
+            ->leftJoin('RYTreasureDBLink.RYTreasureDB.dbo.GameScoreLocker gsl','gsl.UserID=cu.UserID')
+            ->where(['cu.UserID'=>$UserID])
+            ->field('cu.MatchScore,cu.Coffer,gsl.KindID')
+            ->findOrEmpty();
+        if(empty($userInfo)){
+            exitJson(403,'成员不存在');
+        }
+
+        if($userInfo['KindID']){
+            exitJson(403,'游戏中用户不可清除积分');
+        }
+//        开启事务
+        Db::startTrans();
+
+//        清零用户积分
+        $result=clubuser::where(['UserID'=>$ClearUserID,'ClubID'=>$ClubID])->update(['Coffer'=>0]);
+
+//        写清零记录
+        $add=array(
+            'operate'=>$UserID,//操作者
+            'score'=>$userInfo['Coffer'],//保险箱分数
+            'userid'=>$ClearUserID,//被清除者userid
+            'type'=>2,//1为表情2为积分3为土豪4为大赢家
+        );
+
+        $addResult=Clubclearrecord::insert($add);
+        if($result&&$addResult){
+            Db::commit();//执行
+            exitJson(200,'清除成功');
+        }else{
+            Db::rollback();//回滚
+            exitJson(500,'清除失败');
+        }
+    }
+
 //-----------------------------------------管理员功能--------------------------------------------------------
 
 
@@ -1829,7 +2001,7 @@ class Business extends controller
 
     private function UserExitClub($UserID,$DeletedUserID,$ClubID,$type=0){
 
-//            获取用户信息
+        //            获取用户信息
 //            如果用户没有身份或是管理员，则正常退出
 //            如果用户是楼主，则不允许退出
 //            如果用户是合伙人，则先调用撤职方法
@@ -1900,6 +2072,18 @@ class Business extends controller
         $this->BackScore($ClubID,$restScore);
         return $Result;
     }
+
+    /**
+     * 调用
+     * 收回积分
+     *
+     * $UserID      用户id
+     * $ClubID      俱乐部id
+     * $DeletedUserID    被删除者userid
+     * @return $status int  状态码
+     * @return $msg string  错误信息
+     * @return $data array  返回数据
+     */
     private function BackScore($ClubID,$RestScore){
         $userClubInfo=clubuser::where([
             ['UserRight','=',3],
@@ -1912,6 +2096,7 @@ class Business extends controller
             return false;
         }
     }
+
 
     /**
      * 撤职合伙人调用
@@ -2112,71 +2297,7 @@ class Business extends controller
     }
 
 
-    /**
-     * 积分管理
-     * 清除个人积分
-     * $UserID      用户id
-     * $ClubID      俱乐部id
-     * $ClearUserID      要清除用户的UserID
-     * @return $status int  状态码
-     * @return $msg string  错误信息
-     * @return $data array  返回数据
-     * updateTime  2020年2月28日15:41:36
-     */
 
-    public function clearUserScore(){
-        $ClearUserID = input('ClearUserID/d');//被调整用户userID
-        $UserID = input('UserID/d');//执行者的user_id
-        $ClubID = input('ClubID/d');//俱乐部id
-        $sign = input('sign/s');//签名
-        //根据茶馆设置查询权限
-        if(empty($ClearUserID)||empty($UserID)||empty($ClubID)||empty($sign)){
-            exitJson(400,'参数错误');
-        }
-        if($_SESSION['level']!='boss'&&$_SESSION['level']!='manager'){
-            exitJson(401,'无权限');
-        }
-
-//        签名
-        $status=getSignForApi(input('post.'));
-        if($status==false){
-            exitJson(403,'签名错误');
-        }
-//        exitJson(403,'签名错误');
-//        if($sign!=Sign($data)){
-//            exitJson(403,'签名错误');
-//        }
-
-
-        //获取用户个人信息
-        $userInfo=clubuser::getUserClubInfo($ClearUserID,$ClubID,'Coffer');
-        if(empty($userInfo)){
-            exitJson(403,'成员不存在');
-        }
-
-//        开启事务
-        Db::startTrans();
-
-//        清零用户积分
-        $result=clubuser::where(['UserID'=>$ClearUserID,'ClubID'=>$ClubID])->update(['Coffer'=>0]);
-
-//        写清零记录
-        $add=array(
-            'operate'=>$UserID,//操作者
-            'score'=>$userInfo['Coffer'],//保险箱分数
-            'userid'=>$ClearUserID,//被清除者userid
-            'type'=>2,//1为表情2为积分3为土豪4为大赢家
-        );
-
-        $addResult=Clubclearrecord::insert($add);
-        if($result&&$addResult){
-            Db::commit();//执行
-            exitJson(200,'清除成功');
-        }else{
-            Db::rollback();//回滚
-            exitJson(500,'清除失败');
-        }
-    }
 
     /**
      * 清除所有人积分

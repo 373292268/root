@@ -14,12 +14,14 @@ return [
     'type'            => 'sqlsrv',
     // 服务器地址
     'hostname'        => '47.101.206.199',
+//    'hostname'        => '43.241.18.180',
     // 数据库名
     'database'        => '',
     // 用户名
     'username' => 'sa', // 用户名
     // 密码
     'password' => 'GameDB_1', // 密码
+//    'password' => 'XK!@#2020$%^HN', // 密码
     // 端口
 
     'hostport' => 1433, // 端口

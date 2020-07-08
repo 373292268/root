@@ -97,15 +97,17 @@
                                                             <!--</div>-->
                                                         </div>
                                                     </div>
-                                                    <!--<form action="{url('Analyze/DiamondRecord')}" method="post">-->
+                                                    <form action="{:url('User/ClubUser')}" method="get">
                                                         <div class="columns-right pull-right" style="margin-top:10px;margin-bottom:10px;">
                                                             <button class="btn btn-default" type="submit" name="commonSearch" title="普通搜索">
+                                                                <input class="form-control" type="hidden" name="type" value="search">
+                                                                <input class="form-control" type="hidden" name="ClubID" value="{$ClubID}">
                                                                 <i class="glyphicon glyphicon-search"></i></button>
                                                         </div>
                                                         <div class="pull-right search">
-                                                            <input class="form-control" type="text" placeholder="搜索">
+                                                            <input class="form-control" type="text" name="condition" placeholder="搜索">
                                                         </div>
-                                                    <!--</form>-->
+                                                    </form>
                                                 </div>
                                                 <div class="fixed-table-container" style="padding-bottom: 0px;">
                                                     <div class="fixed-table-header" style="display: none;">

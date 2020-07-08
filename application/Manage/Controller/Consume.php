@@ -426,6 +426,8 @@ class Consume extends Common
             ->field('ai.UserID,ai.NickName,urc.RoomCard,ai.AgentID')
             ->findOrEmpty();
 
+
+
 //        writeLog($userInfo,'search_info.log');
 //        exit;
         if($userInfo){

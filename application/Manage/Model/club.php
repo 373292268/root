@@ -157,6 +157,26 @@ class club extends Model
         return $clubInfo;
     }
     /*
+* 根据id或名字获取用户
+*
+* @return $clubInfo 获取茶馆详细信息
+* */
+    public static function teaHouseUserSearch($condition,$ClubID){
+        $clubInfo=self::conn_platform()
+            ->table('clubuser')
+            ->alias('cu')
+            ->where(['ClubID'=>$ClubID])
+            ->where("cu.GameID = ".(int)$condition." or cu.NickName like '%$condition%'")
+
+            ->join('RYAccountsDBLink.RYAccountsDB.dbo.accountsinfo ai','ai.UserID = cu.UserID')
+//            ->join('clubuser cuu','cuu.UserID = cu.UserID')
+            ->field('ai.UserID,ai.GameID,ai.NickName,ai.LastLogonDate,ai.LastLogonIP,ai.WebLogonTimes,ai.StunDown,cu.UserRight,(select count(*) from clubuser cu where cu.UserID = ai.UserID ) as clubCount,(select count(*) from clubuser cu where cu.DistributorId = cu.UserID ) as downUser,(select count(*) from clubuser cu where cu.AgentDistributorId = cu.UserID ) as downAgent')
+            ->paginate(15,false,['query'=>input()]);
+//        p($userList);
+//        exit;
+        return $clubInfo;
+    }
+    /*
 * 根据ClubID获取某个俱乐部的所有人
 *
 * @return $clubInfo 获取茶馆详细信息
@@ -165,7 +185,7 @@ class club extends Model
         $userList=self::conn_platform()
             ->table('clubuser')
             ->alias('cu')
-            ->where(['ClubID'=>$ClubID])
+            ->where(['cu.ClubID'=>$ClubID])
             ->join('RYAccountsDBLink.RYAccountsDB.dbo.accountsinfo ai','ai.UserID = cu.UserID')
 //            ->join('clubuser cuu','cuu.UserID = cu.UserID')
             ->field('ai.UserID,ai.GameID,ai.NickName,ai.LastLogonDate,ai.LastLogonIP,ai.WebLogonTimes,ai.StunDown,cu.UserRight,(select count(*) from clubuser cu where cu.UserID = ai.UserID ) as clubCount,(select count(*) from clubuser cu where cu.DistributorId = cu.UserID ) as downUser,(select count(*) from clubuser cu where cu.AgentDistributorId = cu.UserID ) as downAgent')
